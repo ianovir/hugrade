@@ -349,6 +349,7 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
     }
 
     private void setupMouseInteractions() {
+        //TODO: not working as expected
         scrollPane.setOnMouseClicked(mouseEvent -> {
             if(graphView==null) return;
             double mx = mouseEvent.getX() ;

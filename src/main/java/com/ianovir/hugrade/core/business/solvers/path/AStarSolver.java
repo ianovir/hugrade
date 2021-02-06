@@ -35,7 +35,7 @@ public class AStarSolver extends PathSolver{
 
         float[] fScore = new float[graph.getNodes().size()];
         Arrays.fill(fScore, Float.MAX_VALUE);
-        fScore[source] = euristicFunction(source);
+        fScore[source] = heuristicFunction(source);
 
         while(!openSet.isEmpty()){
             //the node in openSet having the lowest fScore[] value
@@ -60,7 +60,7 @@ public class AStarSolver extends PathSolver{
                 if(tentativeGScore< gScore[neighbor.getId()]){
                     cameFrom.put(neighbor.getId(),current);
                     gScore[neighbor.getId()] = tentativeGScore;
-                    fScore[neighbor.getId()] = gScore[neighbor.getId()] + euristicFunction(neighbor.getId());
+                    fScore[neighbor.getId()] = gScore[neighbor.getId()] + heuristicFunction(neighbor.getId());
                     if(openSet.size()==0 || !openSet.contains(neighbor.getId())){
                         openSet.add(neighbor.getId());
                     }
@@ -80,8 +80,8 @@ public class AStarSolver extends PathSolver{
         }
     }
 
-    private float euristicFunction(int h){
-        //TODO: improve euristic function
+    private float heuristicFunction(int h){
+        //TODO: improve heuristic function
         return 0;
     }
 
