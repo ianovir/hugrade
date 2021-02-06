@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane fx:id="mainPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="355.0" prefWidth="453.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ianovir.hugrade.controllers.MainController">
+           <top>
+               <AnchorPane prefHeight="0.0" prefWidth="600.0" BorderPane.alignment="CENTER">
+                   <MenuBar fx:id="mainBar" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                       <Menu fx:id="miFile" mnemonicParsing="false" text="File">
+                           <MenuItem fx:id="miFileNew" mnemonicParsing="false" text="New" />
+                           <SeparatorMenuItem mnemonicParsing="false" />
+                           <MenuItem fx:id="miFileOpen" mnemonicParsing="false" text="Open" />
+                           <MenuItem fx:id="miFileSave" mnemonicParsing="false" text="Save" />
+                           <MenuItem fx:id="miFileSaveAs" mnemonicParsing="false" text="Save as..." />
+                           <SeparatorMenuItem mnemonicParsing="false" />
+                           <Menu mnemonicParsing="false" text="Export...">
+                               <MenuItem fx:id="miExportGml" mnemonicParsing="false" text="GML" />
+                           </Menu>
+                           <SeparatorMenuItem mnemonicParsing="false" />
+                           <MenuItem fx:id="miQuit" mnemonicParsing="false" text="Close" />
+                       </Menu>
+                       <Menu mnemonicParsing="false" text="Edit">
+                           <MenuItem fx:id="miClearNullEdges" mnemonicParsing="false" text="Remove zero edges" />
+                           <SeparatorMenuItem />
+                           <MenuItem fx:id="miSettings" mnemonicParsing="false" text="Settings" />
+                       </Menu>
+                       <Menu mnemonicParsing="false" text="Show">
+                           <MenuItem fx:id="miTransMatrix" mnemonicParsing="false" text="Transition matrix" />
+                           <MenuItem fx:id="miNodesTable" mnemonicParsing="false" text="Nodes matrix" />
+                       </Menu>
+                       <Menu mnemonicParsing="false" text="Solve">
+                           <Menu mnemonicParsing="false" text="Path">
+                               <MenuItem fx:id="miAStarSP" mnemonicParsing="false" text="A*" />
+                               <MenuItem fx:id="miDijkstraSP" mnemonicParsing="false" text="Dijkstra" />
+                               <MenuItem fx:id="miBellmanFordSP" mnemonicParsing="false" text="Bellman-Ford" />
+                           </Menu>
+                           <Menu mnemonicParsing="false" text="Probability">
+                               <MenuItem fx:id="miProsasMarch" mnemonicParsing="false" text="Absorbing states prob." />
+                           </Menu>
+                       </Menu>
+                       <Menu mnemonicParsing="false" text="Help">
+                           <MenuItem fx:id="miAbout" mnemonicParsing="false" text="About" />
+                       </Menu>
+                   </MenuBar>
+               </AnchorPane>
+           </top>
+       <right>
+           <Pane fx:id="elPane" prefHeight="200.0" prefWidth="230" BorderPane.alignment="CENTER">
+           </Pane>
+       </right>
+       <center>
+           <AnchorPane minHeight="0.0" minWidth="0.0">
+               <ScrollPane fx:id="scrollPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                   <Pane fx:id="graphContentPane" />
+               </ScrollPane>
+           </AnchorPane>
+            </center>
+       <left>
+           <AnchorPane minWidth="0" prefHeight="200.0" prefWidth="0" />
+       </left>
+       <bottom>
+           <AnchorPane>
+               <TextArea fx:id="taConsole" editable="false" focusTraversable="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+           </AnchorPane>
+       </bottom>
+    </BorderPane>

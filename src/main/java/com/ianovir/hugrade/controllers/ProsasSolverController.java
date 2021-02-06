@@ -1,0 +1,119 @@
+package com.ianovir.hugrade.controllers;
+
+import com.ianovir.hugrade.core.business.solvers.ProsasSolver;
+import com.ianovir.hugrade.core.models.Graph;
+import com.ianovir.hugrade.views.GraphView;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
+import javafx.scene.control.*;
+
+import java.util.Arrays;
+
+public class ProsasSolverController {
+
+    public Label lblZero;
+    public ProgressBar bar;
+
+    public Button btnSolve;
+    public TableView<float[]> tvResult;
+    public Button btnExport;
+
+    private ObservableList<float[]> data;
+    private GraphView graphView;
+
+    public void setGraphView(GraphView graphView){
+        this.graphView = graphView;
+        data = FXCollections.observableArrayList();
+        init();
+    }
+
+    public void init(){
+
+        if(graphView==null || graphView.getGraph()==null){
+            System.err.println("Input graph is null");
+            return;
+        }
+
+        lblZero.setText("Starting node name: " + graphView.getGraph().getNodeById(0).getName());
+
+        bar.setProgress(ProgressBar.INDETERMINATE_PROGRESS);
+        bar.setVisible(false);
+
+        //TODO: implement export
+        btnExport.setDisable(true);
+
+        btnSolve.setOnAction(event -> {
+            tvResult.getItems().clear();
+            updateData();
+
+            //ID column
+            TableColumn<float[], Integer> idCol = new TableColumn<>("ID");
+            idCol.setSortable(false);
+            idCol.setEditable(false);
+            idCol.setCellValueFactory(param -> new SimpleIntegerProperty((int) param.getValue()[0]).asObject());
+            tvResult.getColumns().add(idCol);
+
+            //Name column
+            TableColumn<float[], String> nameCol = new TableColumn<>("Name");
+            nameCol.setSortable(false);
+            nameCol.setEditable(false);
+            nameCol.setCellValueFactory(param -> new SimpleStringProperty(
+                    graphView.getGraph()
+                            .getNodeById((int)param.getValue()[0])
+                            .getName())
+            );
+            tvResult.getColumns().add(nameCol);
+
+            //value column
+            TableColumn<float[], Double> valCol = new TableColumn<>("Probability");
+            valCol.setSortable(false);
+            valCol.setEditable(false);
+            valCol.setCellValueFactory(param -> new SimpleDoubleProperty(param.getValue()[1]).asObject());
+            tvResult.getColumns().add(valCol);
+
+            //select node on row click
+            tvResult.setRowFactory(tv -> {
+                TableRow<float[]> row = new TableRow<>();
+                row.setOnMouseClicked(e -> graphView.selectNodeById((int) tvResult.getSelectionModel().getSelectedItem()[0]));
+                return row;
+            });
+
+            tvResult.setItems(data);
+            tvResult.refresh();
+
+            btnSolve.setDisable(true);
+        });
+
+    }
+
+    private void updateData() {
+        data.clear();
+        solve(graphView.getGraph());
+    }
+
+    private void solve(Graph graph) {
+        Task<float[][]> task = new Task<>() {
+            @Override
+            public float[][] call() {
+                return ProsasSolver.solve(graph);
+            }
+        };
+
+        task.setOnSucceeded(event -> {
+            bar.setVisible(false);
+            float[][]  res = task.getValue();
+            if(res!=null){
+                data.addAll(Arrays.asList(res));
+            }
+            System.out.println(Arrays.deepToString(res));
+        });
+
+        bar.setVisible(true);
+        new Thread(task).start();
+    }
+
+}
