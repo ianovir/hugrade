@@ -1,6 +1,8 @@
 # Hugrade
 Graph designer in java FX.
 
+<img src="https://github.com/ianovir/hugrade/blob/main/src/main/resources/logo.png" alt="drawing" width="400"/>
+
 ## Intro
 Hugrade is a very simple software that allows to draw and analyze bidirected weighted graphs from scratch. 
 
