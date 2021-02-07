@@ -44,7 +44,7 @@ From IntelliJ, execute the `gradlew run` task.
 To build an executable, lightweight `.jar`, execute the `gradlew jar` task: the output will be located under the
 `{project_root}/build/libs` directory. 
 
-To launch the `.jar` you need java and [javafx SDK](https://gluonhq.com/products/javafx/), then use the following parameters for the VM:
+To launch the `.jar` you need java and [javafx SDK](https://gluonhq.com/products/javafx/), then pass the following options to the VM:
 
 ```
 java --module-path "path\to\javafx\lib" --add-modules=javafx.controls,javafx.fxml -jar hugrade-1.0.0.jar
