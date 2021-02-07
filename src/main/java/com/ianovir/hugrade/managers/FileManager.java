@@ -23,6 +23,7 @@ public class FileManager {
             e.printStackTrace();
         } finally {
             try {
+                assert fw != null;
                 fw.flush();
                 fw.close();
             } catch (Exception e) {

@@ -309,7 +309,14 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
     }
 
     private void launchProsasWindow() {
-        if(graphView==null) return;
+        if(graphView==null || graphView.getGraph()==null) return;
+        if(graphView.getGraph().getNodeById(0)==null){
+            Alert errAlert = new Alert(Alert.AlertType.ERROR);
+            errAlert.setHeaderText("No zero node");
+            errAlert.setContentText("The PROSAS solver needs one zero indexed node.\nAborting.");
+            errAlert.showAndWait();
+            return;
+        }
         Parent root;
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/prosas_solver.fxml"));

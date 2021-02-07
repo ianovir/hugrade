@@ -38,7 +38,7 @@ public class ProsasSolverController {
             return;
         }
 
-        lblZero.setText("Starting node name: " + graphView.getGraph().getNodeById(0).getName());
+        lblZero.setText("Starting node: " + graphView.getGraph().getNodeById(0).getName());
 
         bar.setProgress(ProgressBar.INDETERMINATE_PROGRESS);
         bar.setVisible(false);

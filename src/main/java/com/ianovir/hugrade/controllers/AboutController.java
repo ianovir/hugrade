@@ -10,7 +10,7 @@ public class AboutController {
     public Hyperlink lblMainLink;
 
     public void init( Application app){
-        lblMainLink.setOnAction(t -> app.getHostServices().showDocument("https://ianovir.com/works/open-source/hugrade/"));
+        lblMainLink.setOnAction(t -> app.getHostServices().showDocument("https://ianovir.com/hugrade/"));
         lblVersion.setText("v." + Main.UGLY_VERSION);
     }
 }
