@@ -10,7 +10,7 @@ import javafx.stage.Stage;
 public class Main extends Application {
 
     private MainController mainController;
-    public static String UGLY_VERSION = "1.0.0";
+    public static String UGLY_VERSION = "1.0.1";
 
     @Override
     public void start(Stage primaryStage) throws Exception{
@@ -24,7 +24,7 @@ public class Main extends Application {
         primaryStage.setResizable(true);
         Scene scene = new Scene(root, 800,600);
 
-        primaryStage.setOnCloseRequest(event -> mainController.close());
+        primaryStage.setOnCloseRequest(event -> mainController.close(event));
 
         primaryStage.setScene(scene);
         primaryStage.setTitle("Hugrade");

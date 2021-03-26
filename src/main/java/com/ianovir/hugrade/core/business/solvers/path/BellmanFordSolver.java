@@ -22,61 +22,6 @@ public class BellmanFordSolver extends PathSolver{
                                                                 NegativeEdgesOp.AS_IS));
     }
 
-    //@Override
-    public int[] solve_old(int source, int target, GraphSolverSettings settings) {
-
-        graph.sortNodes();
-
-        //initialize
-        float[][] tm = Graph2TransMatrixConverter.convert(graph);
-        handleEdges(tm, settings);
-        float[] distance = new float[tm[0].length];
-        Arrays.fill(distance, Float.MAX_VALUE);
-        int[] predecessor = new int[tm[0].length];
-        Arrays.fill(predecessor, -1);
-
-        distance[source]=0;
-
-        //relax edges
-        for(int relax=0;relax<tm.length;relax++){
-            for(int u=0;u<tm.length;u++){
-                for(int v=0;v<tm.length;v++){
-                    if(distance[u] + tm[u][v] < distance[v]){
-                        distance[v] = distance[u] + tm[u][v];
-                        predecessor[v] = u;
-                    }
-                }
-            }
-        }
-
-        //check for negative-weight cycles
-        for(int u=0;u<tm.length;u++){
-            for(int v=0;v<tm.length;v++){
-                if(distance[u] + tm[u][v] < distance[v]){
-                    System.err.println("Negative-weight cycle detected");
-                    return null;
-                }
-            }
-        }
-
-        //reconstruct path
-        ArrayList<Integer> path = new ArrayList<>();
-        ArrayList<float[]> tempCost = new ArrayList<>();
-        path.add(target);
-        int currentNode = target;
-        while(currentNode!=source && currentNode!=-1){
-            path.add(0,predecessor[currentNode]);
-            currentNode = predecessor[currentNode];
-            tempCost.add(new float[]{0,0});
-        }
-        tempCost.add(new float[]{0,0});
-
-        //Collections.reverse(path);
-        this.costs = tempCost.toArray(new float[tempCost.size()][2]);
-        return path.stream().mapToInt(i->i).toArray();
-
-    }
-
     @Override
     public int[] solve(int source, int target, GraphSolverSettings settings) {
 

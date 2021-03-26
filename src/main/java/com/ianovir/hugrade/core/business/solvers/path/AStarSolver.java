@@ -8,7 +8,7 @@ import com.ianovir.hugrade.core.models.Graph;
 import java.util.*;
 
 /**
- * Implementation of the A-star shortest-path shortest-path algorithm for graphs
+ * Implementation of the A-star shortest-path algorithm for graphs
  */
 public class AStarSolver extends PathSolver{
 

@@ -138,10 +138,16 @@ public class Graph {
         GNode nodeB = getNodeById(newID);
         if(nodeA!=null){
             if(nodeB!=null){
+                GEdge[] edgesB = getEdgesByNode(nodeB);
+                for(GEdge e: edgesB)e.updateNodeId(newID, oldID);
                 nodeB.setID(oldID);
             }
+
+            GEdge[] edgesA = getEdgesBySourceNode(nodeA);
+            for(GEdge e: edgesA)e.updateNodeId(oldID, newID);
             nodeA.setID(newID);
         }
+        nodes.sort(Comparator.comparingInt(GNode::getId));
     }
 
     public void normalizeNode(GNode node) {

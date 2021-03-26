@@ -1,6 +1,5 @@
 package com.ianovir.hugrade.controllers;
 
-import com.ianovir.hugrade.Main;
 import com.ianovir.hugrade.core.business.converters.Graph2GMLConverter;
 import com.ianovir.hugrade.core.business.solvers.path.AStarSolver;
 import com.ianovir.hugrade.core.business.solvers.path.BellmanFordSolver;
@@ -27,9 +26,11 @@ import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Optional;
 
 import static com.ianovir.hugrade.managers.FileManager.openGraphFile;
 import static com.ianovir.hugrade.managers.FileManager.saveGraphFile;
@@ -163,7 +164,7 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
 
         });
 
-        miQuit.setOnAction(e ->close());
+        miQuit.setOnAction(e ->close(new WindowEvent(taConsole.getScene().getWindow(), e.getEventType())));
         miTransMatrix.setOnAction(e->launchTransMxWindow());
         miNodesTable.setOnAction(e->launchNodesWindow());
         miDijkstraSP.setOnAction(e->launchDijkstraSPSolver());
@@ -473,12 +474,29 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
        return rTree;
     }
 
-    public void close() {
-        if(graphView!=null && currentFile!=null){
-            //TODO: ask for saving before exit
-            saveGraphFile(graphView, currentFile);
+    public void close(WindowEvent event) {
+
+        if(event.isConsumed()) return;
+
+        if (graphView != null) {
+            ButtonType no = new ButtonType("No", ButtonBar.ButtonData.NO);
+            ButtonType yes = new ButtonType("Yes", ButtonBar.ButtonData.YES);
+
+            Alert walert = new Alert(Alert.AlertType.WARNING, "Are you sure you want to quit?", no, yes);
+            walert.setHeaderText("Quitting");
+
+            Optional<ButtonType> result = walert.showAndWait();
+            ButtonType button = null;
+            if(result.isPresent()) button = result.get();
+            if ( button!=null && button == yes) {
+                Platform.exit();
+            }else{
+                event.consume();
+            }
+        }else{
+            Platform.exit();
         }
-        Platform.exit();
+
     }
 
     private void updateScene() {
@@ -524,6 +542,5 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
             }
         }
     }
-
 
 }
