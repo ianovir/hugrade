@@ -97,13 +97,6 @@ public class GNode {
         this.value = value;
     }
 
-    public String getColorString(){
-        return String.format("#%02X%02X%02X",
-                (int)(color[0] * 255.0),
-                (int)(color[1] * 255.0),
-                (int)(color[2] * 255.0));
-    }
-
     @Override
     public String toString() {
         return  name ;

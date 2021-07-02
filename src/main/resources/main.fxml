@@ -25,7 +25,7 @@
                            <SeparatorMenuItem />
                            <MenuItem fx:id="miSettings" mnemonicParsing="false" text="Settings" />
                        </Menu>
-                       <Menu mnemonicParsing="false" text="View">
+                       <Menu mnemonicParsing="false" text="Show">
                            <MenuItem fx:id="miTransMatrix" mnemonicParsing="false" text="Transition matrix" />
                            <MenuItem fx:id="miNodesTable" mnemonicParsing="false" text="Nodes matrix" />
                        </Menu>

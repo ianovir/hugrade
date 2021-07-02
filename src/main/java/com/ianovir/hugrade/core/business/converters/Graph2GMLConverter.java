@@ -20,9 +20,9 @@ public class Graph2GMLConverter {
         //header
         sb.append("graph").append("\n").append("[").append("\n");
 
-        //sb.append("version ").append(Graph.VERSION).append("\n");
-        //sb.append("nodes_mu \"").append(graph.getNodeMu()).append("\"\n");
-        //sb.append("edges_mu \"").append(graph.getEdgeMu()).append("\"\n");
+        sb.append("version ").append(Graph.VERSION).append("\n");
+        sb.append("nodes_mu \"").append(graph.getNodeMu()).append("\"\n");
+        sb.append("edges_mu \"").append(graph.getEdgeMu()).append("\"\n");
 
         for(GNode node : graph.getNodes()) parseNode(node, sb);
         for(GEdge edge : graph.getEdges()) parseEdge(edge, sb);
@@ -38,13 +38,12 @@ public class Graph2GMLConverter {
         sb.append("\tnode").append("\n").append("\t[").append("\n");
 
         sb.append("\t\tid ").append(node.getId()).append("\n");
-        sb.append("\t\tlabel \"").append(node.getName()).append("\"\n");
+        sb.append("\t\tname \"").append(node.getName()).append("\"\n");
         sb.append("\t\tdescription \"").append(node.getDescription()).append("\"\n");
 
         sb.append("\t\tgraphics ").append("\n\t\t[").append("\n");
         sb.append("\t\t\tx ").append(node.getX()).append("\n");
         sb.append("\t\t\ty ").append(node.getY()).append("\n");
-        sb.append("\t\t\tfill \"").append(node.getColorString()).append("\"\n");
         sb.append("\t\t]").append("\n");
 
         //footer
@@ -57,7 +56,6 @@ public class Graph2GMLConverter {
 
         sb.append("\t\tsource ").append(edge.getSource()).append("\n");
         sb.append("\t\ttarget ").append(edge.getDestination()).append("\n");
-        sb.append("\t\tlabel \"").append(edge.getWeight()).append("\"\n");
         sb.append("\t\tweight ").append(edge.getWeight()).append("\n");
 
         //footer
