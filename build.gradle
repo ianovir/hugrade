@@ -42,6 +42,7 @@ jlink {
     launcher {
         name = 'main'
     }
+    environment "VAR", "val"
 }
 
 //To run the built jar, you need java and javafx, then use the following parameters:
