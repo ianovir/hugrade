@@ -1,7 +1,7 @@
 plugins {
     id 'application'
     id 'org.openjfx.javafxplugin' version '0.0.9'
-    id 'org.beryx.jlink' version '2.23.3'
+    id 'org.beryx.jlink' version '2.24.0'
 }
 
 compileJava.options.encoding = 'UTF-8'
@@ -11,7 +11,7 @@ apply plugin: 'idea'
 
 mainClassName = 'com.ianovir.hugrade.Main'
 group = 'com.ianovir.hugrade'
-version = '1.0.1'
+version = '1.0.2'
 
 idea {
     module {

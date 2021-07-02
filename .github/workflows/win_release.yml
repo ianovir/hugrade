@@ -1,0 +1,39 @@
+name: Windows Release
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    
+    - uses: actions/checkout@v2
+    
+    - name: Set up JDK
+      uses: actions/setup-java@v2
+      with:
+        java-version: '11'
+        distribution: 'adopt'
+        javafx: true
+
+    - name: Build with Gradle (jlink)
+      run: ./gradlew.bat jlink
+     
+    - name: Pack release
+      run: tar.exe -a -c -f hugrade_release_win.zip ./build/image
+                
+    - name: Create Release
+      uses: ncipollo/release-action@v1
+      with:
+        artifacts: hugrade_release_win.zip
+        allowUpdates: true
+        tag: ${{ github.ref }}
+        token: ${{ secrets.GITHUB_TOKEN }}
+      
+        
