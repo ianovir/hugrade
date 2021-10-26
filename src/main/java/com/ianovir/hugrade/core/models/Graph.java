@@ -118,7 +118,7 @@ public class Graph {
 
 
     /**
-     * Re-assign new ids to the nodes belonging to the graph
+     * Re-assign new ids to the nodes
      */
     public void sortNodes(){
         System.out.println("Sorting nodes' IDs...");
@@ -135,28 +135,31 @@ public class Graph {
 
     public void changeNodeID(int oldID, int newID){
         GNode nodeA = getNodeById(oldID);
-        GNode nodeB = getNodeById(newID);
-        if(nodeA!=null){
-            if(nodeB!=null){
-                GEdge[] edgesB = getEdgesByNode(nodeB);
-                for(GEdge e: edgesB)e.updateNodeId(newID, oldID);
-                nodeB.setID(oldID);
-            }
+        if(nodeA==null) return;
 
-            GEdge[] edgesA = getEdgesBySourceNode(nodeA);
-            for(GEdge e: edgesA)e.updateNodeId(oldID, newID);
-            nodeA.setID(newID);
+        GNode nodeB = getNodeById(newID);
+        if(nodeB!=null){
+            for(GEdge e: getEdgesByNode(nodeB))
+                e.updateNodeId(newID, oldID);
+
+            nodeB.setID(oldID);
         }
+
+        for(GEdge e: getEdgesBySourceNode(nodeA))
+            e.updateNodeId(oldID, newID);
+
+        nodeA.setID(newID);
+
         nodes.sort(Comparator.comparingInt(GNode::getId));
     }
 
     public void normalizeNode(GNode node) {
-            GEdge[] nEdges = getEdgesBySourceNode(node);
-            float sumW = 0;
-            for(GEdge e : nEdges) sumW+= Math.abs(e.getWeight());
-            if(sumW!=0){
-                for(GEdge e : nEdges) e.setWeight(e.getWeight()/sumW);
-            }
+        GEdge[] nEdges = getEdgesBySourceNode(node);
+        float weightSum = 0;
+        for(GEdge e : nEdges) weightSum+= Math.abs(e.getWeight());
+        if(weightSum!=0){
+            for(GEdge e : nEdges) e.setWeight(e.getWeight()/weightSum);
+        }
     }
 
     public boolean showNodeValues() {

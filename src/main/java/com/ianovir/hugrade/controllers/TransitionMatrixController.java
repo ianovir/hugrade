@@ -33,52 +33,57 @@ public class TransitionMatrixController {
     }
 
     private void initialize() {
-        if(!initialized){
+        if(initialized) return;
 
-            miNormalizeNode.setOnAction(a-> {
-                if(graphView.getSelectedNodes().size()>0){
-                    for(NodeView nv : graphView.getSelectedNodes()){
-                        graphView.getGraph().normalizeNode(nv.getGNode());
-                    }
-                    graphView.refreshEdges();
-                    transMatrix.forceUpdate();
+        setupNormalizeButtons();
+        setupExportButtons();
+        initialized = true;
+    }
+
+    private void setupExportButtons() {
+        miTxExportTxt.setOnAction(event -> {
+            String res = TransMatrix2TxtConverter.convert(graphView.getGraph());
+
+            FileChooser fileChooser = new FileChooser();
+            FileChooser.ExtensionFilter extFilter =
+                    new FileChooser.ExtensionFilter("Text file (*.txt)", "*.txt");
+            fileChooser.getExtensionFilters().add(extFilter);
+
+            File file = fileChooser.showSaveDialog(mainPane.getScene().getWindow());
+            if (file != null) writeToFile(res, file);
+
+        });
+
+        miTxExportCsv.setOnAction(event -> {
+            String res = TransMatrix2CsvConverter.doWork(graphView.getGraph());
+
+            FileChooser fileChooser = new FileChooser();
+            FileChooser.ExtensionFilter extFilter =
+                    new FileChooser.ExtensionFilter("CSV file (*.csv)", "*.csv");
+            fileChooser.getExtensionFilters().add(extFilter);
+
+            File file = fileChooser.showSaveDialog(mainPane.getScene().getWindow());
+            if (file != null) writeToFile(res, file);
+        });
+    }
+
+    private void setupNormalizeButtons() {
+        miNormalizeNode.setOnAction(a-> {
+            if(graphView.getSelectedNodes().size()>0){
+                for(NodeView nv : graphView.getSelectedNodes()){
+                    graphView.getGraph().normalizeNode(nv.getGNode());
                 }
-            });
-
-            miNormalizeGraph.setOnAction(a-> {
-                GraphNormalizer gn = new GraphNormalizer();
-                gn.doWork(graphView.getGraph());
                 graphView.refreshEdges();
                 transMatrix.forceUpdate();
-            });
+            }
+        });
 
-            miTxExportTxt.setOnAction(event -> {
-                String res = TransMatrix2TxtConverter.convert(graphView.getGraph());
-
-                FileChooser fileChooser = new FileChooser();
-                FileChooser.ExtensionFilter extFilter =
-                        new FileChooser.ExtensionFilter("Text file (*.txt)", "*.txt");
-                fileChooser.getExtensionFilters().add(extFilter);
-
-                File file = fileChooser.showSaveDialog(mainPane.getScene().getWindow());
-                if (file != null) writeToFile(res, file);
-
-            });
-
-            miTxExportCsv.setOnAction(event -> {
-                String res = TransMatrix2CsvConverter.doWork(graphView.getGraph());
-
-                FileChooser fileChooser = new FileChooser();
-                FileChooser.ExtensionFilter extFilter =
-                        new FileChooser.ExtensionFilter("CSV file (*.csv)", "*.csv");
-                fileChooser.getExtensionFilters().add(extFilter);
-
-                File file = fileChooser.showSaveDialog(mainPane.getScene().getWindow());
-                if (file != null) writeToFile(res, file);
-            });
-
-            initialized = true;
-        }
+        miNormalizeGraph.setOnAction(a-> {
+            GraphNormalizer gn = new GraphNormalizer();
+            gn.doWork(graphView.getGraph());
+            graphView.refreshEdges();
+            transMatrix.forceUpdate();
+        });
     }
 
     private void writeToFile(String res, File file) {

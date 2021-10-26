@@ -32,15 +32,46 @@ public class NodePaneController {
         this.node = n;
         this.graphView = graphV;
 
-        labelId.setText(String.valueOf(node.getGNode().getId()));
+        setupLabels();
 
         setupEdgesList();
+        setupTextFieldName();
+        setupTextFieldValue();
+        setupTextAreaDescription();
+        setupColorPicker();
+        setupSetZeroButton();
 
-        tfName.setText(node.getGNode().getName());
-        tfName.textProperty().addListener((observable, oldValue, newValue) ->
-                node.setName(newValue)
+        valueGroup.setVisible(graphView.getGraph().showNodeValues());
+    }
+
+    private void setupLabels() {
+        labelId.setText(String.valueOf(node.getGNode().getId()));
+        muLbl.setText(graphView.getGraph().getNodeMu());
+    }
+
+    private void setupSetZeroButton() {
+        btnSetZero.setOnAction(event -> {
+                    graphView.getGraph().changeNodeID(node.getGNode().getId(), 0);
+                    labelId.setText(String.valueOf(node.getGNode().getId()));
+                }
         );
+    }
 
+    private void setupColorPicker() {
+        colPicker.setValue(node.getColor());
+        colPicker.setOnAction(t -> {
+            node.setColor(colPicker.getValue());
+            lastColor = colPicker.getValue();
+        });
+    }
+
+    private void setupTextAreaDescription() {
+        taDescription.setText(node.getGNode().getDescription());
+        taDescription.textProperty().addListener((observable, oldValue, newValue) ->
+                node.getGNode().setDescription(newValue));
+    }
+
+    private void setupTextFieldValue() {
         tfValue.setText(String.format("%.1f", node.getGNode().getValue()));
         tfValue.textProperty().addListener((observable, oldValue, newValue) -> {
             try{
@@ -51,25 +82,13 @@ public class NodePaneController {
             }
 
         });
+    }
 
-        taDescription.setText(node.getGNode().getDescription());
-        taDescription.textProperty().addListener((observable, oldValue, newValue) ->
-                node.getGNode().setDescription(newValue));
-
-        colPicker.setValue(node.getColor());
-        colPicker.setOnAction((EventHandler<ActionEvent>) t -> {
-            node.setColor(colPicker.getValue());
-            lastColor = colPicker.getValue();
-        });
-
-        btnSetZero.setOnAction(event -> {
-                    graphView.getGraph().changeNodeID(node.getGNode().getId(), 0);
-                    labelId.setText(String.valueOf(node.getGNode().getId()));
-                }
+    private void setupTextFieldName() {
+        tfName.setText(node.getGNode().getName());
+        tfName.textProperty().addListener((observable, oldValue, newValue) ->
+                node.setName(newValue)
         );
-
-        muLbl.setText(graphView.getGraph().getNodeMu());
-        valueGroup.setVisible(graphView.getGraph().showNodeValues());
     }
 
     /**
@@ -77,7 +96,7 @@ public class NodePaneController {
      */
     private void setupEdgesList() {
         TableColumn<EdgeView, String> fromColumn = new TableColumn<>("From");
-        fromColumn.setCellFactory(new Callback<TableColumn<EdgeView, String>, TableCell<EdgeView, String>>() {
+        fromColumn.setCellFactory(new Callback<>() {
             @Override
             public TableCell call(final TableColumn<EdgeView, String> param) {
                 final TableCell<EdgeView, String> cell = new TableCell<EdgeView, String>() {
@@ -100,7 +119,7 @@ public class NodePaneController {
         });
 
         TableColumn<EdgeView, String> toColumn = new TableColumn<>("To");
-        toColumn.setCellFactory(new Callback<TableColumn<EdgeView, String>, TableCell<EdgeView, String>>() {
+        toColumn.setCellFactory(new Callback<>() {
             @Override
             public TableCell call(final TableColumn<EdgeView, String> param) {
                 final TableCell<EdgeView, String> cell = new TableCell<EdgeView, String>() {
@@ -123,7 +142,7 @@ public class NodePaneController {
         });
 
         TableColumn<EdgeView, String> weightColumn = new TableColumn<>("Weight");
-        weightColumn.setCellFactory(new Callback<TableColumn<EdgeView, String>, TableCell<EdgeView, String>>() {
+        weightColumn.setCellFactory(new Callback<>() {
             @Override
             public TableCell call(final TableColumn<EdgeView, String> param) {
                 final TableCell<EdgeView, String> cell = new TableCell<EdgeView, String>() {

@@ -271,6 +271,18 @@ public class GraphView {
         }
     }
 
+    void updateOrCreateEdge(int src, int dst, float edgeVal) {
+        GEdge edge = getGraph().getEdgesByNodeIDs(src, dst);
+        if(edge!=null) {
+            edge.setWeight(edgeVal);
+        }else{
+            //creating new edge
+            addEdges(new EdgeView(getNodeById(src),
+                    getNodeById(dst),
+                    new GEdge(edgeVal, src, dst)));
+        }
+    }
+
     public interface SelectionObserver {
         void onSelectedItem(Node selectedNode);
     }

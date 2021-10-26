@@ -1,7 +1,6 @@
 package com.ianovir.hugrade.views;
 
 import com.ianovir.hugrade.core.business.converters.Graph2TransMatrixConverter;
-import com.ianovir.hugrade.core.models.GEdge;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -23,17 +22,12 @@ public class TransitionMatrixView extends AnchorPane {
 
     public TransitionMatrixView() {
         super();
-        transMatrixTable = new TableView<>();
-        transMatrixTable.setEditable(true);
+
         data = FXCollections.observableArrayList();
         graphChangeObservers = new ArrayList<>();
+        transMatrixTable = new TableView<>();
 
-        //select node on row click
-        transMatrixTable.setRowFactory(tv -> {
-            TableRow<String[]> row = new TableRow<>();
-            row.setOnMouseClicked(event -> graphView.selectNodeById( transMatrixTable.getSelectionModel().getSelectedIndex()));
-            return row;
-        });
+        setupTransitionMatrixTable();
 
         AnchorPane.setBottomAnchor(transMatrixTable, 0.0);
         AnchorPane.setTopAnchor(transMatrixTable, 0.0);
@@ -41,6 +35,17 @@ public class TransitionMatrixView extends AnchorPane {
         AnchorPane.setRightAnchor(transMatrixTable, 0.0);
 
         getChildren().addAll(transMatrixTable);
+    }
+
+    private void setupTransitionMatrixTable() {
+        transMatrixTable.setEditable(true);
+
+        //select node on row click
+        transMatrixTable.setRowFactory(tv -> {
+            TableRow<String[]> row = new TableRow<>();
+            row.setOnMouseClicked(event -> graphView.selectNodeById( transMatrixTable.getSelectionModel().getSelectedIndex()));
+            return row;
+        });
     }
 
     public void setGraphView(GraphView graphView){
@@ -51,50 +56,72 @@ public class TransitionMatrixView extends AnchorPane {
     public void forceUpdate() {
         transMatrixTable.getColumns().clear();
 
-        updateData();
+        refreshData();
 
         //define columns
         for (int col = 0; col < data.size()+1; col++) {
-            TableColumn<String[], String> tc =
-                    new TableColumn(col==0?"": graphView.getGraph().getNodes().get(col-1).getName());
-            tc.setSortable(false);
-            tc.setEditable(true);
-            tc.setCellFactory(TextFieldTableCell.forTableColumn());
-            tc.setOnEditCommit(event -> {
-                float newVal = 0;
-                try{
-                    newVal = Float.parseFloat(event.getNewValue());
-                }catch(NumberFormatException ignored){}
+            TableColumn<String[], String> newTableColumn = buildTableColumn(col);
+            newTableColumn.setOnEditCommit(event -> {
+                float newVal = parseEventValue(event);
 
                 int r = event.getTablePosition().getRow();
                 int c = event.getTablePosition().getColumn();
-                data.get(r)[c-1] = String.valueOf(newVal);
 
                 if(c>0){
-                    GEdge edge = graphView.getGraph().getEdgesByNodeIDs(r, c-1);
-                    if(edge!=null) {
-                        edge.setWeight(newVal);
-                    }else{
-                        //creating new edge
-                        graphView.addEdges(new EdgeView(graphView.getNodeById(r),
-                                graphView.getNodeById(c-1),
-                                new GEdge(newVal, r, c-1)));
-                    }
-                    updateData();
-                    for(GraphChangeObserver obs : graphChangeObservers) obs.onGraphChanged(graphView);
+                    graphView.updateOrCreateEdge(r, c-1, newVal);
+                    updateData(r, c-1, newVal);
+                    refreshData();
+                    notifyObservers();
                 }
                 event.consume();
             });
-            int finalCol = col;
-            tc.setCellValueFactory(param -> new SimpleStringProperty(param.getValue()[finalCol]));
-            transMatrixTable.getColumns().add(tc);
+
+            transMatrixTable.getColumns().add(newTableColumn);
         }
 
         transMatrixTable.setItems(data);
 
     }
 
-    private void updateData() {
+    private void updateData(int src, int dst, float newVal) {
+        data.get(src)[dst] = String.valueOf(newVal);
+    }
+
+    private float parseEventValue(TableColumn.CellEditEvent<String[], String> event) {
+        float newVal = 0;
+        try{
+            newVal = Float.parseFloat(event.getNewValue());
+        }catch(NumberFormatException ignored){
+            //TODO: prompt error!
+        }
+        return newVal;
+    }
+
+    private void notifyObservers() {
+        //TODO: detail event
+        for(GraphChangeObserver obs : graphChangeObservers)
+            obs.onGraphChanged(graphView);
+    }
+
+    private TableColumn<String[], String> buildTableColumn(int columnIndex) {
+        String colName = "";
+        if(columnIndex > 0){
+            var node = graphView.getGraph().getNodes().get(columnIndex-1);
+            colName = node.getName();
+        }
+        TableColumn<String[], String> result = new TableColumn<>(colName);
+        result.setSortable(false);
+        result.setEditable(true);
+        result.setCellFactory(TextFieldTableCell.forTableColumn());
+
+        int finalCol = columnIndex;
+        result.setCellValueFactory(param -> new SimpleStringProperty(param.getValue()[finalCol]));
+
+        return result;
+
+    }
+
+    private void refreshData() {
         data.clear();
 
         //prepare data with row headers
