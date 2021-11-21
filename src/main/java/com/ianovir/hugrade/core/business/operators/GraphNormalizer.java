@@ -11,7 +11,7 @@ public class GraphNormalizer implements GraphOperator{
     @Override
     public Graph doWork(Graph graph) {
         for(GNode n: graph.getNodes()){
-            graph.normalizeNode(n);
+            graph.normalizeNodeEdges(n);
         }
         return graph;
     }

@@ -22,7 +22,6 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -40,9 +39,7 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
     private GraphView graphView;
     private NodeView firstNode;
 
-    private NodeView helperOrigin;
-    private NodeView helperDestination;
-    private EdgeView helperEdge;
+
     public TextArea taConsole;
 
     public Menu miFile;
@@ -75,19 +72,15 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
     private double panPressedX;
     private double panPressedY;
 
-    private static final FileChooser.ExtensionFilter graphExtFilter =
+    private final FileChooser.ExtensionFilter graphExtFilter =
             new FileChooser.ExtensionFilter("Hugrade Graph project (*.xgp)", "*.xgp");
 
-    private static final FileChooser.ExtensionFilter gmlExtFilter =
+    private final FileChooser.ExtensionFilter gmlExtFilter =
             new FileChooser.ExtensionFilter("Graph Modelling Language (*.gml)", "*.gml");
 
     public void init(Application application)  {
 
         this.application = application;
-        helperOrigin = new NodeView( 0,0);
-        helperDestination = new NodeView(0,0);
-        helperEdge = new EdgeView(helperOrigin, helperDestination, 1);
-        helperEdge.setColor(Color.RED);
 
         fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(graphExtFilter);
@@ -410,13 +403,13 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
         }
         if(firstNode == null){
             firstNode = (NodeView)n;
-            helperOrigin.setPos(firstNode.getCenterX(), firstNode.getCenterY());
+            graphView.setHelperOriginPos(firstNode.getCenterX(), firstNode.getCenterY());
             startNewEdgeHelp(true);
         }
         else{
             NodeView dst = (NodeView)n;
             if(!graphView.edgeExists(firstNode, dst)){//checking if the edge exists already
-                EdgeView ne= new EdgeView(firstNode, dst,1 );
+                EdgeView ne= new EdgeView(graphView.getGraph(), firstNode, dst,1 );
                 graphView.addEdges(ne);
                 firstNode = null;
                 startNewEdgeHelp(false);
@@ -426,15 +419,14 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
     }
 
     private void startNewEdgeHelp(boolean start) {
-        helperEdge.setVisible(start);
+        graphView.getHelpEdge().setVisible(start);
         enableOnMouseUpdate(start);
     }
 
     private void enableOnMouseUpdate(boolean b) {
         if(b){
             graphContentPane.setOnMouseMoved(mouseEvent -> {
-                helperDestination.setCenterX(mouseEvent.getX());
-                helperDestination.setCenterY(mouseEvent.getY());
+                graphView.setHelperDestinationPos(mouseEvent.getX(), mouseEvent.getY());
             });
         }else{
             mainPane.setOnMouseMoved(null);
@@ -454,7 +446,7 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
                 Parent root = loader.load();
                 elPane.getChildren().setAll(root);
                 EdgePaneController edgePaneController = loader.getController();
-                edgePaneController.setEdge((EdgeView) n, graphView);
+                edgePaneController.setEdge( (EdgeView) n, graphView);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -462,16 +454,17 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
     }
 
     private GraphView buildDefaultTree() {
-       GraphView rTree = new GraphView(new Graph());
-       NodeView nodeA = new NodeView("A", 50,100);
-       NodeView nodeB = new NodeView("B",  150, 300);
-       NodeView nodeC = new NodeView("C", 300, 150);
-       EdgeView edge1 = new EdgeView(nodeC, nodeB, 1f);
-       EdgeView edge2 = new EdgeView(nodeC, nodeA, 1f);
-       EdgeView edge3 = new EdgeView(nodeC, nodeC, 1f);
-       rTree.addNodes(nodeA, nodeB, nodeC);
-       rTree.addEdges(edge1, edge2, edge3);
-       return rTree;
+        Graph g = new Graph();
+        GraphView rTree = new GraphView(g);
+        NodeView nodeA = new NodeView("A", 50,100);
+        NodeView nodeB = new NodeView("B",  150, 300);
+        NodeView nodeC = new NodeView("C", 300, 150);
+        rTree.addNodes(nodeA, nodeB, nodeC);
+        EdgeView edge1 = new EdgeView(g, nodeC, nodeB, 1f);
+        EdgeView edge2 = new EdgeView(g, nodeC, nodeA, 1f);
+        EdgeView edge3 = new EdgeView(g, nodeC, nodeC, 1f);
+        rTree.addEdges(edge1, edge2, edge3);
+        return rTree;
     }
 
     public void close(WindowEvent event) {
@@ -502,7 +495,6 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
     private void updateScene() {
         if(graphView!=null){
             graphContentPane.getChildren().clear();
-            graphContentPane.getChildren().add(helperEdge);
             graphContentPane.getChildren().addAll(graphView.explode());
         }
     }
@@ -542,5 +534,4 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
             }
         }
     }
-
 }

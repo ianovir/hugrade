@@ -1,6 +1,7 @@
 package com.ianovir.hugrade.views;
 
 import com.ianovir.hugrade.core.models.GEdge;
+import com.ianovir.hugrade.core.models.Graph;
 import javafx.beans.InvalidationListener;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -21,6 +22,7 @@ public class EdgeView extends CubicCurve {
     private static final double PI_4 = Math.PI/4;
     private static final double STROKE_W = 2;
     private static final double SELF_FACT = 4;
+    private final Graph graph;
     private NodeView origin;
     private NodeView destination;
 
@@ -34,13 +36,16 @@ public class EdgeView extends CubicCurve {
     private InvalidationListener controlXUpdater;
     private InvalidationListener controlYUpdater;
 
-    public EdgeView(NodeView origin, NodeView destination, float weight) {
-        this(origin, destination, new GEdge(weight, origin.getGNode().getId(), destination.getGNode().getId()) );
+    public EdgeView(Graph graph, NodeView origin, NodeView destination, float weight) {
+        this(graph, origin, destination, new GEdge(weight,
+                graph.getNodeId(origin.getGNode()),
+                graph.getNodeId(destination.getGNode())) );
     }
 
-    public EdgeView(NodeView origin, NodeView destination, GEdge e) {
+    public EdgeView(Graph graph, NodeView origin, NodeView destination, GEdge e) {
         super();
         this.mEdge = e;
+        this.graph = graph;
         setupUpdateListeners();
 
         setOrigin(origin);
@@ -150,7 +155,7 @@ public class EdgeView extends CubicCurve {
         }
 
         this.origin = origin;
-        mEdge.setSource(origin.getGNode().getId());
+        mEdge.setSource(graph.getNodeId(origin.getGNode()));
 
         origin.centerXProperty().addListener(controlXUpdater);
         origin.centerYProperty().addListener(controlYUpdater);
@@ -167,7 +172,7 @@ public class EdgeView extends CubicCurve {
         }
 
         this.destination = destination;
-        mEdge.setDestination(destination.getGNode().getId());
+        mEdge.setDestination(graph.getNodeId(destination.getGNode()));
 
         destination.centerXProperty().addListener(controlXUpdater);
         destination.centerYProperty().addListener(controlYUpdater);

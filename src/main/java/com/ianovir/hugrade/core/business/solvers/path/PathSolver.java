@@ -112,9 +112,10 @@ public abstract class PathSolver implements GraphSolver {
 
     protected GEdge handleNeighborEdge(Integer current, GNode neighbor, GraphSolverSettings settings) {
         //ignore edges with same dst and target
-        if(current==neighbor.getId()) return null;
-        GEdge currentEdge  = graph.getEdgesByNodeIDs(current, neighbor.getId());
-        GEdge bidirectionalEdge  = graph.getEdgesByNodeIDs(neighbor.getId(), current);
+        int neighId = graph.getNodeId(neighbor);
+        if(current == neighId) return null;
+        GEdge currentEdge  = graph.getEdgesByNodeIDs(current, neighId);
+        GEdge bidirectionalEdge  = graph.getEdgesByNodeIDs(neighId, current);
 
         if (currentEdge == null) {
             if (settings.getmEdgesOp() == BidirectionalConnectionOp.DIRECT) {

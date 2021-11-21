@@ -57,12 +57,15 @@ public class AStarSolver extends PathSolver{
                 if(currentEdge==null) continue;
 
                 float tentativeGScore = gScore[current] + currentEdge.getWeight();
-                if(tentativeGScore< gScore[neighbor.getId()]){
-                    cameFrom.put(neighbor.getId(),current);
-                    gScore[neighbor.getId()] = tentativeGScore;
-                    fScore[neighbor.getId()] = gScore[neighbor.getId()] + heuristicFunction(neighbor.getId());
-                    if(openSet.size()==0 || !openSet.contains(neighbor.getId())){
-                        openSet.add(neighbor.getId());
+
+                int neighborId = graph.getNodeId(neighbor);
+
+                if(tentativeGScore< gScore[neighborId]){
+                    cameFrom.put(neighborId,current);
+                    gScore[neighborId] = tentativeGScore;
+                    fScore[neighborId] = gScore[neighborId] + heuristicFunction(neighborId);
+                    if(openSet.size()==0 || !openSet.contains(neighborId)){
+                        openSet.add(neighborId);
                     }
                 }
             }

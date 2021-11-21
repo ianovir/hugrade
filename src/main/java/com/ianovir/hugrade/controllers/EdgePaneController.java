@@ -56,52 +56,63 @@ public class EdgePaneController {
 
         updateOriginCombobox();
         updateDestinationCombobox();
+        setupExtremeComboboxes(graphView);
 
+        btnSwap.setOnAction(event -> {
+
+            swapExtremes();
+        });
+    }
+
+    private void setupExtremeComboboxes(GraphView graphView) {
         cbDestination.valueProperty().addListener((observable, oldValue, newValue) -> {
             if(newValue!=null) {
-                if (!edgeExists(edge.getSource(), newValue.getId() )) {
-                    this.edgeView.setDestination(graphView.getNodeById(newValue.getId()));
+                int nodeId = graph.getNodeId(newValue);
+                if (!edgeExists(edge.getSource(), nodeId )) {
+                    this.edgeView.setDestination(graphView.getNodeViewById(nodeId));
                     updateOriginCombobox();
                     edgeView.refresh();
                 } else {
                     System.err.printf("Edge %d->%d already exists%n",
-                            edgeView.getEdge().getSource(), newValue.getId());
+                            edgeView.getEdge().getSource(), nodeId);
                 }
             }
         });
 
         cbOrigin.valueProperty().addListener((observable, oldValue, newValue) -> {
             if(newValue!=null){
-                if(!edgeExists(newValue.getId(), edge.getDestination())){
-                    this.edgeView.setOrigin(graphView.getNodeById(newValue.getId()));
+                int nodeId = graph.getNodeId(newValue);
+                if(!edgeExists(nodeId, edge.getDestination())){
+                    this.edgeView.setOrigin(graphView.getNodeViewById(nodeId));
                     updateDestinationCombobox();
                     edgeView.refresh();
                 }else{
                     System.err.printf("Edge %d->%d already exists%n",
-                            newValue.getId(), edgeView.getEdge().getSource());
+                            nodeId, edgeView.getEdge().getSource());
                 }
             }
         });
+    }
 
-        btnSwap.setOnAction(event -> {
-            if(!edgeExists(edgeView.getDestination().getGNode().getId(),
-                    edgeView.getOrigin().getGNode().getId())){
+    private void swapExtremes() {
+        int dstId = graph.getNodeId(edgeView.getDestination().getGNode());
+        int oriId = graph.getNodeId(edgeView.getOrigin().getGNode());
 
-                NodeView dummy = new NodeView("", 0, 0);
-                NodeView dst = edgeView.getDestination();
-                NodeView src = edgeView.getOrigin();
+        if(!edgeExists(dstId,oriId)){
+            NodeView dummy = new NodeView("", 0, 0);
+            NodeView dst = edgeView.getDestination();
+            NodeView src = edgeView.getOrigin();
 
-                edgeView.setDestination(dummy);
-                edgeView.setOrigin(dst);
-                edgeView.setDestination(src);
-                updateDestinationCombobox();
-                updateOriginCombobox();
-                edgeView.refresh();
+            edgeView.setDestination(dummy);
+            edgeView.setOrigin(dst);
+            edgeView.setDestination(src);
+            updateDestinationCombobox();
+            updateOriginCombobox();
+            edgeView.refresh();
 
-            }else{
-                System.out.println("Inverted edge already exists");
-            }
-        });
+        }else{
+            System.out.println("Inverted edge already exists");
+        }
     }
 
     private void updateDestinationCombobox() {

@@ -51,8 +51,11 @@ public class PathSolverController {
             if(cbOrigin.getSelectionModel().getSelectedItem()==null ||
                     cbDestination.getSelectionModel().getSelectedItem()==null) return;
 
-            int src = cbOrigin.getSelectionModel().getSelectedItem().getId();
-            int dst = cbDestination.getSelectionModel().getSelectedItem().getId();
+            GNode srcNode = cbOrigin.getSelectionModel().getSelectedItem();
+            GNode dstNode = cbDestination.getSelectionModel().getSelectedItem();
+
+            int src = graph.getNodeId(srcNode);
+            int dst = graph.getNodeId(dstNode);
 
             Task<int[]> task = new Task<>() {
                 @Override

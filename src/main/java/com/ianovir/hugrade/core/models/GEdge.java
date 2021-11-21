@@ -44,9 +44,12 @@ public class GEdge {
         this.destination = destination;
     }
 
-    public void updateNodeId(int oldId, int id) {
-        if(destination==oldId) destination = id;
-        if(source==oldId) source = id;
+    public void swapNodesIds(int a , int b){
+        if(source == a) source = b;
+        else if(source == b) source = a;
+
+        if(destination == a) destination = b;
+        else if(destination == b) destination = a;
     }
 
     @Override

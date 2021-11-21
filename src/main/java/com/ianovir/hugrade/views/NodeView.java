@@ -35,22 +35,35 @@ public class NodeView extends Circle {
         super( centerX, centerY, DEF_RAD);
         this.mNode = new GNode(name, centerX, centerY);
 
-        nameText = new Text();
-        nameText.setFont(Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 14));
-
-        valueText = new Text();
-        valueText.setFont(Font.font("verdana", FontWeight.NORMAL, FontPosture.REGULAR, 10));
+        nameText = setupNameText();
+        valueText = setupValueText();
 
         setColor(Color.ORANGE);
         updateFillNStroke();
 
         addShadow();
+        bindInnedNodePosition();
+        bindTextPosition();
+        configureMouseOps();
+        refresh();
 
-        //binding positions to inner node:
-        centerXProperty().addListener(o -> mNode.setX(getCenterX()));
-        centerYProperty().addListener(o -> mNode.setY(getCenterY()));
+    }
 
-        //binding texts' positions:
+    private Text setupValueText() {
+        final Text valueText;
+        valueText = new Text();
+        valueText.setFont(Font.font("verdana", FontWeight.NORMAL, FontPosture.REGULAR, 10));
+        return valueText;
+    }
+
+    private Text setupNameText() {
+        final Text nameText;
+        nameText = new Text();
+        nameText.setFont(Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 14));
+        return nameText;
+    }
+
+    private void bindTextPosition() {
         InvalidationListener fixNameX = o -> nameText.setX(getCenterX() - nameText.getLayoutBounds().getWidth()/2);
         InvalidationListener fixNameY = o -> nameText.setY(getCenterY() + nameText.getLayoutBounds().getHeight()/4);
 
@@ -81,32 +94,38 @@ public class NodeView extends Circle {
                 e.printStackTrace();
             }
         });
+    }
 
-        refresh();
-        configureMouseOps();
-
+    private void bindInnedNodePosition() {
+        centerXProperty().addListener(o -> mNode.setX(getCenterX()));
+        centerYProperty().addListener(o -> mNode.setY(getCenterY()));
     }
 
     public NodeView(String name, double centerX, double centerY){
         this(name, centerX, centerY, 0f);
     }
 
+    public NodeView(GNode n) {
+        this(n.getName(), n.getX(), n.getY(), n.getValue());
+        this.mNode = n;
+        double[] color = n.getColor();
+        if(color!=null) this.color = new Color(color[0], color[1], color[2], 1d);
+        updateFillNStroke();
+    }
+
     private void addShadow() {
+        DropShadow e = getDropShadow();
+        setEffect(e);
+    }
+
+    private DropShadow getDropShadow() {
         DropShadow e = new DropShadow();
         e.setWidth(50);
         e.setHeight(50);
         e.setOffsetX(0);
         e.setOffsetY(0);
         e.setRadius(5);
-        setEffect(e);
-    }
-
-    public NodeView(GNode n) {
-        this(n.getName(), n.getX(), n.getY(), n.getValue());
-        double[] color = n.getColor();
-        if(color!=null) this.color = new Color(color[0], color[1], color[2], 1d);
-        updateFillNStroke();
-        this.mNode = n;
+        return e;
     }
 
     private void updateFillNStroke(){

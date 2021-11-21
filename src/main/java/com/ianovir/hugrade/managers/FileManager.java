@@ -22,13 +22,18 @@ public class FileManager {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            try {
-                assert fw != null;
+            closeFileWriter(fw);
+        }
+    }
+
+    private static void closeFileWriter(FileWriter fw) {
+        try {
+            if(fw!=null){
                 fw.flush();
                 fw.close();
-            } catch (Exception e) {
-                e.printStackTrace();
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

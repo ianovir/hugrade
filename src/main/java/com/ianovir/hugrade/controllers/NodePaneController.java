@@ -45,14 +45,14 @@ public class NodePaneController {
     }
 
     private void setupLabels() {
-        labelId.setText(String.valueOf(node.getGNode().getId()));
+        labelId.setText(String.valueOf(getNodeId()));
         muLbl.setText(graphView.getGraph().getNodeMu());
     }
 
     private void setupSetZeroButton() {
         btnSetZero.setOnAction(event -> {
-                    graphView.getGraph().changeNodeID(node.getGNode().getId(), 0);
-                    labelId.setText(String.valueOf(node.getGNode().getId()));
+                    graphView.getGraph().changeNodeID(getNodeId(), 0);
+                    labelId.setText(String.valueOf(getNodeId()));
                 }
         );
     }
@@ -69,6 +69,10 @@ public class NodePaneController {
         taDescription.setText(node.getGNode().getDescription());
         taDescription.textProperty().addListener((observable, oldValue, newValue) ->
                 node.getGNode().setDescription(newValue));
+    }
+
+    private int getNodeId() {
+        return graphView.getGraph().getNodeId(node.getGNode());
     }
 
     private void setupTextFieldValue() {

@@ -8,6 +8,7 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
+import javafx.scene.paint.Color;
 
 import java.util.*;
 
@@ -22,7 +23,11 @@ public class GraphView {
     private ArrayList<NodeView> selectedNodes;
     private ArrayList<EdgeView> selectedEdges;
 
+    private NodeView helperOrigin;
+    private NodeView helperDestination;
+
     private ArrayList<SelectionObserver> selectionObservers;
+    private EdgeView helperEdge;
 
     public GraphView(Graph graph){
         try{
@@ -35,6 +40,8 @@ public class GraphView {
             selectedEdges = new ArrayList<>();
             this.mGraph = graph;
 
+            initHelperEdge();
+
             if(mGraph !=null){
                 for(GNode n : graph.getNodes()) addNode(new NodeView(n));
 
@@ -45,7 +52,7 @@ public class GraphView {
                     NodeView src = findNodeViewById(e.getSource());
                     NodeView dst = findNodeViewById(e.getDestination());
                     if(dst!=null && src!=null)
-                        addEdge(new EdgeView(src, dst,e));
+                        addEdge(new EdgeView(graph, src, dst,e));
                     else
                         edgesIterator.remove();
                 }
@@ -76,8 +83,15 @@ public class GraphView {
 
     }
 
+    private void initHelperEdge() {
+        helperOrigin = new NodeView( 0,0);
+        helperDestination = new NodeView(0,0);
+        helperEdge = new EdgeView(getGraph(), helperOrigin, helperDestination, 1);
+        helperEdge.setColor(Color.RED);
+    }
+
     private NodeView findNodeViewById(int id) {
-        Object[] r = nodes.stream().filter(n -> n.getGNode().getId() == id).toArray();
+        Object[] r = nodes.stream().filter(n -> mGraph.getNodeId(n.getGNode()) == id).toArray();
         if(r!=null && r.length>0) return (NodeView) r[0];
         return null;
     }
@@ -109,6 +123,7 @@ public class GraphView {
             ret.add(e);
             Collections.addAll(ret, e.getContent());
         }
+        Collections.addAll(ret, helperEdge);
         for(NodeView n : nodes) {
             n.refresh();
             ret.add(n);
@@ -147,14 +162,14 @@ public class GraphView {
     public void select(Node n) {
         if(n==null) return;
         clearSelection();
-        if(n instanceof  NodeView) addSelectedNode((NodeView) n);
-        if(n instanceof EdgeView) setSelectedEdges((EdgeView) n);
+        if(n instanceof  NodeView) selectNode((NodeView) n);
+        if(n instanceof EdgeView) selectedEdges((EdgeView) n);
     }
 
     public void selectNodeById(int nid){
         if(nid<0 || nid>=nodes.size()) return;
         clearSelection();
-        addSelectedNode(nodes.get(nid));
+        selectNode(getNodeViewById(nid));
     }
 
     public void clearSelection() {
@@ -172,14 +187,14 @@ public class GraphView {
         return selectedEdges;
     }
 
-    private void addSelectedNode(NodeView node) {
+    private void selectNode(NodeView node) {
         if(this.selectedNodes ==null) return;
         selectedNodes.add(node);
         node.select(true);
         notifyObservers(node);
     }
 
-    private void setSelectedEdges(EdgeView edge) {
+    private void selectedEdges(EdgeView edge) {
         if(edge==null) return;
         selectedEdges.add(edge);
         edge.setIsSelected(true);
@@ -239,8 +254,10 @@ public class GraphView {
         }
     }
 
-    public NodeView getNodeById(int nodeID) {
-        Optional<NodeView> opn = nodes.stream().filter(n -> n.getGNode().getId() == nodeID).findFirst();
+    public NodeView getNodeViewById(int nodeID) {
+        Optional<NodeView> opn = nodes.stream()
+                .filter(n -> mGraph.getNodeId(n.getGNode()) == nodeID)
+                .findFirst();
         return opn.orElse(null);
     }
 
@@ -264,9 +281,9 @@ public class GraphView {
 
     public void selectNodes(int[] nodes) {
         for(Integer i : nodes){
-            NodeView nv = getNodeById(i);
+            NodeView nv = getNodeViewById(i);
             if(nv!=null){
-                addSelectedNode(nv);
+                selectNode(nv);
             }
         }
     }
@@ -277,14 +294,26 @@ public class GraphView {
             edge.setWeight(edgeVal);
         }else{
             //creating new edge
-            addEdges(new EdgeView(getNodeById(src),
-                    getNodeById(dst),
+            addEdges(new EdgeView(mGraph, getNodeViewById(src),
+                    getNodeViewById(dst),
                     new GEdge(edgeVal, src, dst)));
         }
     }
 
+    public void setHelperOriginPos(double x, double y) {
+        helperOrigin.setPos(x, y);
+    }
+
+    public void setHelperDestinationPos(double x, double y) {
+        helperDestination.setPos(x, y);
+    }
+
     public interface SelectionObserver {
         void onSelectedItem(Node selectedNode);
+    }
+
+    public EdgeView getHelpEdge(){
+        return helperEdge;
     }
 
 }

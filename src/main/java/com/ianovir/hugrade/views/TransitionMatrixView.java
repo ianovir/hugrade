@@ -28,13 +28,15 @@ public class TransitionMatrixView extends AnchorPane {
         transMatrixTable = new TableView<>();
 
         setupTransitionMatrixTable();
+        setMatrixTableAnchors();
+        getChildren().addAll(transMatrixTable);
+    }
 
+    private void setMatrixTableAnchors() {
         AnchorPane.setBottomAnchor(transMatrixTable, 0.0);
         AnchorPane.setTopAnchor(transMatrixTable, 0.0);
         AnchorPane.setLeftAnchor(transMatrixTable, 0.0);
         AnchorPane.setRightAnchor(transMatrixTable, 0.0);
-
-        getChildren().addAll(transMatrixTable);
     }
 
     private void setupTransitionMatrixTable() {
@@ -43,7 +45,9 @@ public class TransitionMatrixView extends AnchorPane {
         //select node on row click
         transMatrixTable.setRowFactory(tv -> {
             TableRow<String[]> row = new TableRow<>();
-            row.setOnMouseClicked(event -> graphView.selectNodeById( transMatrixTable.getSelectionModel().getSelectedIndex()));
+            row.setOnMouseClicked(event -> graphView.selectNodeById(
+                    transMatrixTable.getSelectionModel().getSelectedIndex())
+            );
             return row;
         });
     }

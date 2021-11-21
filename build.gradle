@@ -26,11 +26,19 @@ repositories {
 
 dependencies {
     implementation 'com.google.code.gson:gson:2.8.6'
+    implementation 'org.junit.jupiter:junit-jupiter:5.4.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.4.2'
+
 }
 
 java {
     modularity.inferModulePath = true
 }
+
+test {
+    useJUnitPlatform()
+}
+
 
 javafx {
     version = "15"

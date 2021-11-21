@@ -34,7 +34,6 @@ public class TransitionMatrixController {
 
     private void initialize() {
         if(initialized) return;
-
         setupNormalizeButtons();
         setupExportButtons();
         initialized = true;
@@ -69,21 +68,27 @@ public class TransitionMatrixController {
 
     private void setupNormalizeButtons() {
         miNormalizeNode.setOnAction(a-> {
-            if(graphView.getSelectedNodes().size()>0){
-                for(NodeView nv : graphView.getSelectedNodes()){
-                    graphView.getGraph().normalizeNode(nv.getGNode());
-                }
-                graphView.refreshEdges();
-                transMatrix.forceUpdate();
-            }
+            normalizeSelectedNodeEdges();
         });
 
         miNormalizeGraph.setOnAction(a-> {
             GraphNormalizer gn = new GraphNormalizer();
             gn.doWork(graphView.getGraph());
-            graphView.refreshEdges();
-            transMatrix.forceUpdate();
+            refreshUI();
         });
+    }
+
+    private void refreshUI() {
+        graphView.refreshEdges();
+        transMatrix.forceUpdate();
+    }
+
+    private void normalizeSelectedNodeEdges() {
+        if(graphView.getSelectedNodes().size()<=0) return;
+        for(NodeView nv : graphView.getSelectedNodes()){
+            graphView.getGraph().normalizeNodeEdges(nv.getGNode());
+        }
+        refreshUI();
     }
 
     private void writeToFile(String res, File file) {
