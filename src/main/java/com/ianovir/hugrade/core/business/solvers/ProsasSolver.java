@@ -14,20 +14,15 @@ public class ProsasSolver {
     /**
      * Solves the probability of absorbing states. The node with ID=0 is considered the starting one.
      * @param graph the {@link Graph} to be solved, interpreted as a Markov chain
-     * @return a nx2 matrix F, where n is the number of the absorbing states. the
+     * @return a nx2 matrix F, where n is the number of the absorbing states.
      */
     public static float[][] solve(Graph graph){
         try{
-
-            graph.sortNodes();
-
             System.out.println("Computing transient matrix...");
             float[][] m = Graph2TransMatrixConverter.convert(graph);
+
             if(m.length==2 || m.length==1) {
-                return new float[][]{
-                        new float[]{1},
-                        new float[]{1}
-                };
+                return trivialResult();
             }
 
             System.out.println("Normalizing transient matrix...");
@@ -47,6 +42,7 @@ public class ProsasSolver {
             float[][] identityMatrix = MatrixUtils.getIdentity(matrixQ.length);
             float[][] matrixIminusQ = MatrixUtils.subtractMatrices(identityMatrix, matrixQ);
 
+            assert matrixIminusQ != null;
             float[][] N =  MatrixUtils.inverse(matrixIminusQ);
             float[][] F =  MatrixUtils.multiplyMatrices(N, matrixR);
 
@@ -61,6 +57,13 @@ public class ProsasSolver {
             ex.printStackTrace();
         }
         return null;
+    }
+
+    private static float[][] trivialResult() {
+        return new float[][]{
+                new float[]{1},
+                new float[]{1}
+        };
     }
 
 

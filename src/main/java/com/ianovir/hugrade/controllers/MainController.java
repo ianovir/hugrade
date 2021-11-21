@@ -37,8 +37,7 @@ import static com.ianovir.hugrade.managers.FileManager.saveGraphFile;
 public class MainController implements GraphView.SelectionObserver, TransitionMatrixView.GraphChangeObserver {
 
     private GraphView graphView;
-    private NodeView firstNode;
-
+    private NodeView firstSelectionNode;
 
     public TextArea taConsole;
 
@@ -101,62 +100,11 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
     }
 
     private void setupMenuItems() {
-
-        miFileNew.setOnAction(e -> {
-            currentFile=null;
-            if(graphView!=null) graphView.removeSelectionObserver(this);
-            graphView = buildDefaultTree();
-            graphView.addSelectionObserver(this);
-            onGraphChanged(graphView);
-        });
-
-        miFileOpen.setOnAction(e -> {
-                    if(currentFile!=null) fileChooser.setInitialDirectory(currentFile.getParentFile());
-                    File file = fileChooser.showOpenDialog(mainPane.getScene().getWindow());
-                    if (file != null) {
-                        graphView = openGraphFile(file);
-                        if(graphView!=null){
-                            graphView.addSelectionObserver(this);
-                        }
-                        currentFile = file;
-                        onGraphChanged(graphView);
-                    }
-                });
-
-        miFileSave.setOnAction(e -> {
-                    if(graphView==null) return;
-                    if(currentFile!=null)
-                        saveGraphFile(graphView, currentFile);
-                    else
-                        miFileSaveAs.getOnAction().handle(e);
-                });
-
-        miFileSaveAs.setOnAction(e -> {
-            if(graphView==null) return;
-            if(currentFile!=null) fileChooser.setInitialDirectory(currentFile.getParentFile());
-            File file = fileChooser.showSaveDialog(mainPane.getScene().getWindow());
-            if (file != null) {
-                saveGraphFile(graphView, file);
-            }
-        });
-
-        miExportGml.setOnAction(e -> {
-            if(graphView==null) return;
-            FileChooser fs = new FileChooser();
-            fs.getExtensionFilters().add(gmlExtFilter);
-            if(currentFile!=null) fs.setInitialDirectory(currentFile.getParentFile());
-            File file = fs.showSaveDialog(mainPane.getScene().getWindow());
-            if(file!=null){
-                String content = Graph2GMLConverter.convert(graphView.getGraph());
-                try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-                    writer.write(content);
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
-            }
-
-        });
-
+        miFileNew.setOnAction(e -> actionNewFile());
+        miFileOpen.setOnAction(e -> actionOpenFile());
+        miFileSave.setOnAction(this::actionFileSave);
+        miFileSaveAs.setOnAction(e -> actionFileSaveAs());
+        miExportGml.setOnAction(e -> actionExportGml());
         miQuit.setOnAction(e ->close(new WindowEvent(taConsole.getScene().getWindow(), e.getEventType())));
         miTransMatrix.setOnAction(e->launchTransMxWindow());
         miNodesTable.setOnAction(e->launchNodesWindow());
@@ -164,18 +112,71 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
         miAStarSP.setOnAction(e->launchAStarSPSolver());
         miProsasMarch.setOnAction(event ->launchProsasWindow());
         miBellmanFordSP.setOnAction(event ->launchBellmanFordWindow());
-
         miSettings.setOnAction(e-> launchGraphSettings());
-
-        miClearNullEdges.setOnAction(e->{
-            if(graphView!=null){
-                graphView.clearZeroEdges();
-                updateScene();
-            }
-        });
-
+        miClearNullEdges.setOnAction(e-> actionClearNullEdges());
         miAbout.setOnAction(e-> launchAbout());
+    }
 
+    private void actionNewFile() {
+        currentFile=null;
+        if(graphView!=null) graphView.removeSelectionObserver(this);
+        graphView = buildDefaultTree();
+        graphView.addSelectionObserver(this);
+        onGraphChanged(graphView);
+    }
+
+    private void actionClearNullEdges() {
+        if(graphView!=null){
+            graphView.clearZeroEdges();
+            updateScene();
+        }
+    }
+
+    private void actionExportGml() {
+        if(graphView==null) return;
+        FileChooser fs = new FileChooser();
+        fs.getExtensionFilters().add(gmlExtFilter);
+        if(currentFile!=null) fs.setInitialDirectory(currentFile.getParentFile());
+        File file = fs.showSaveDialog(mainPane.getScene().getWindow());
+        if(file!=null){
+            String content = Graph2GMLConverter.convert(graphView.getGraph());
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+                writer.write(content);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+
+    private void actionFileSaveAs() {
+        if(graphView==null) return;
+        if(currentFile!=null) fileChooser.setInitialDirectory(currentFile.getParentFile());
+        File file = fileChooser.showSaveDialog(mainPane.getScene().getWindow());
+        if (file != null) {
+            saveGraphFile(graphView, file);
+            currentFile = file;
+        }
+    }
+
+    private void actionFileSave(javafx.event.ActionEvent e) {
+        if(graphView==null) return;
+        if(currentFile!=null)
+            saveGraphFile(graphView, currentFile);
+        else
+            miFileSaveAs.getOnAction().handle(e);
+    }
+
+    private void actionOpenFile() {
+        if(currentFile!=null) fileChooser.setInitialDirectory(currentFile.getParentFile());
+        File file = fileChooser.showOpenDialog(mainPane.getScene().getWindow());
+        if (file != null) {
+            graphView = openGraphFile(file);
+            if(graphView!=null){
+                graphView.addSelectionObserver(this);
+            }
+            currentFile = file;
+            onGraphChanged(graphView);
+        }
     }
 
     private void launchDijkstraSPSolver() {
@@ -198,23 +199,37 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
         if(graphView==null) return null;
         Parent root;
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/path_solver.fxml"));
-            root = loader.load();
-            PathSolverController ctrl = loader.getController();
-            ctrl.init(graphView, solver);
-            Stage stage = new Stage();
-            stage.getIcons().add(new Image(getClass().getResourceAsStream("/icon.png")));
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.setTitle(title);
-            stage.setScene(new Scene(root));
-            stage.setResizable(false);
-            stage.show();
-            return ctrl;
+            return tryLaunchPathSolverController(title, solver);
         }
         catch (IOException e) {
             e.printStackTrace();
         }
         return null;
+    }
+
+    private PathSolverController tryLaunchPathSolverController(String title, PathSolver solver) throws IOException {
+        Parent root;
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/path_solver.fxml"));
+        root = loader.load();
+        PathSolverController ctrl = loader.getController();
+        ctrl.init(graphView, solver);
+        launchNewStage(title, root);
+        return ctrl;
+    }
+
+    private Stage launchNewStage(String title, Parent root) {
+        return launchNewStage(title, new Scene(root));
+    }
+
+    private Stage launchNewStage(String title, Scene scene) {
+        Stage stage = new Stage();
+        stage.getIcons().add(new Image(getClass().getResourceAsStream("/icon.png")));
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.setTitle(title);
+        stage.setScene(scene);
+        stage.setResizable(false);
+        stage.show();
+        return stage;
     }
 
     private void launchGraphSettings() {
@@ -225,14 +240,8 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
             root = loader.load();
             GraphSettingsController ctrl = loader.getController();
             ctrl.init(graphView.getGraph());
-            Stage stage = new Stage();
-            stage.getIcons().add(new Image(getClass().getResourceAsStream("/icon.png")));
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.setTitle("Settings");
-            stage.setScene(new Scene(root));
-            stage.setResizable(false);
+            Stage stage = launchNewStage("Settings", root);
             stage.setOnCloseRequest(event -> updateScene());
-            stage.show();
         }
         catch (IOException e) {
             e.printStackTrace();
@@ -246,13 +255,7 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
             root = loader.load();
             AboutController ctrl = loader.getController();
             ctrl.init(application);
-            Stage stage = new Stage();
-            stage.getIcons().add(new Image(getClass().getResourceAsStream("/icon.png")));
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.setTitle("About");
-            stage.setScene(new Scene(root));
-            stage.setResizable(false);
-            stage.show();
+            launchNewStage("About", root);
         }
         catch (IOException e) {
             e.printStackTrace();
@@ -268,12 +271,7 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
             TransitionMatrixController ctrl = loader.getController();
             ctrl.setGraphView(graphView);
             ctrl.getTransMatrix().addChangeObserver(this);
-            Stage stage = new Stage();
-            stage.getIcons().add(new Image(getClass().getResourceAsStream("/icon.png")));
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.setTitle("Transition matrix");
-            stage.setScene(new Scene(root, 450, 450));
-            stage.show();
+            launchNewStage("Transition matrix", new Scene(root, 450, 450) );
         }
         catch (IOException e) {
             e.printStackTrace();
@@ -289,13 +287,7 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
             NodesMatrixController ctrl = loader.getController();
             ctrl.setGraphView(graphView);
             ctrl.addChangeObserver(this);
-            Stage stage = new Stage();
-            stage.getIcons().add(new Image(getClass().getResourceAsStream("/icon.png")));
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.setTitle("Nodes matrix");
-            stage.setScene(new Scene(root));
-            stage.setResizable(false);
-            stage.show();
+            launchNewStage("Nodes matrix", root);
         }
         catch (IOException e) {
             e.printStackTrace();
@@ -317,13 +309,7 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
             root = loader.load();
             ProsasSolverController ctrl = loader.getController();
             ctrl.setGraphView(graphView);
-            Stage stage = new Stage();
-            stage.getIcons().add(new Image(getClass().getResourceAsStream("/icon.png")));
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.setTitle("Prosas solver");
-            stage.setScene(new Scene(root));
-            stage.setResizable(false);
-            stage.show();
+            launchNewStage("Prosas solver", root);
         }
         catch (IOException e) {
             e.printStackTrace();
@@ -333,49 +319,29 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
     private void setupKeyboardInteractions() {
         graphContentPane.getScene().setOnKeyPressed(e -> {
             if (e.getCode() == KeyCode.DELETE) {
-                ArrayList<NodeView> selNodes= graphView.getSelectedNodes();
-                ArrayList<EdgeView> selEdges = graphView.getSelectedEdges();
-                if(!selNodes.isEmpty()){
-                    graphView.removeNodes(selNodes);
-                    graphView.clearSelection();
-                    updateScene();
-                }
-                if(!selEdges.isEmpty()){
-                    graphView.removeEdges(selEdges);
-                    graphView.clearSelection();
-                    updateScene();
-                }
+                deleteSelectedNodes(graphView.getSelectedNodes());
+                deleteSelectedEdges(graphView.getSelectedEdges());
             }
         });
     }
 
+    private void deleteSelectedEdges(ArrayList<EdgeView> selEdges) {
+        if(selEdges.isEmpty()) return;
+        graphView.removeEdges(selEdges);
+        graphView.clearSelection();
+        updateScene();
+    }
+
+    private void deleteSelectedNodes(ArrayList<NodeView> selNodes) {
+        if(selNodes.isEmpty()) return;
+        graphView.removeNodes(selNodes);
+        graphView.clearSelection();
+        updateScene();
+    }
+
     private void setupMouseInteractions() {
         //TODO: not working as expected
-        scrollPane.setOnMouseClicked(mouseEvent -> {
-            if(graphView==null) return;
-            double mx = mouseEvent.getX() ;
-            double my = mouseEvent.getY();
-            Node n = graphView.hitSomething(mx, my);
-            if(n!=null) graphView.select(n);
-
-           if (mouseEvent.getButton()== MouseButton.PRIMARY) {
-               if (n == null && mouseEvent.getClickCount() == 2) {
-                   //adding new node if double-clicked:
-                   NodeView nnode = new NodeView("Node", mx, my);
-                   nnode.setColor(NodePaneController.getLastColor());
-                   graphView.addNodes(nnode);
-                   updateScene();
-               }
-           }
-            else
-                if(mouseEvent.getButton()== MouseButton.SECONDARY) {
-                    if (n instanceof NodeView) {
-                        updateNewEdgeProc(n);
-                    } else {
-                        updateNewEdgeProc(null);
-                    }
-                }
-        });
+        scrollPane.setOnMouseClicked(this::mainMouseClickHandler);
 
         //panning:
         graphContentPane.setOnMousePressed(event -> {
@@ -394,28 +360,67 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
         });
     }
 
-    private void updateNewEdgeProc(Node n) {
-        if(n==null){
-            firstNode = null;
-            startNewEdgeHelp(false);
-            updateScene();
-            return;
-        }
-        if(firstNode == null){
-            firstNode = (NodeView)n;
-            graphView.setHelperOriginPos(firstNode.getCenterX(), firstNode.getCenterY());
-            startNewEdgeHelp(true);
-        }
-        else{
-            NodeView dst = (NodeView)n;
-            if(!graphView.edgeExists(firstNode, dst)){//checking if the edge exists already
-                EdgeView ne= new EdgeView(graphView.getGraph(), firstNode, dst,1 );
-                graphView.addEdges(ne);
-                firstNode = null;
-                startNewEdgeHelp(false);
-                updateScene();
+    private void mainMouseClickHandler(javafx.scene.input.MouseEvent mouseEvent) {
+        if(graphView==null) return;
+        double mx = mouseEvent.getX() ;
+        double my = mouseEvent.getY();
+        Node n = graphView.hitSomething(mx, my);
+        if(n!=null) graphView.select(n);
+
+        if (mouseEvent.getButton()== MouseButton.PRIMARY) {
+            if (n == null && mouseEvent.getClickCount() == 2) {
+                createNewNode(mx, my);
             }
         }
+         else
+             if(mouseEvent.getButton()== MouseButton.SECONDARY) {
+                 if (n instanceof NodeView) {
+                     updateNewEdgeCreationRoutine(n);
+                 } else {
+                     updateNewEdgeCreationRoutine(null);
+                 }
+             }
+    }
+
+    private void createNewNode(double mx, double my) {
+        NodeView nnode = new NodeView("Node", mx, my);
+        nnode.setColor(NodePaneController.getLastColor());
+        graphView.addNodes(nnode);
+        updateScene();
+    }
+
+    private void updateNewEdgeCreationRoutine(Node n) {
+        if(n==null){
+            resetNewEdgeCreation();
+            return;
+        }
+
+        if(firstSelectionNode == null)
+            startNewEdgeCreation((NodeView) n);
+        else
+            finishNewEdgeCreation((NodeView) n);
+
+    }
+
+    private void finishNewEdgeCreation(NodeView n) {
+        boolean edgeExists = graphView.edgeExists(firstSelectionNode, n);
+        if(!edgeExists){
+            EdgeView ne= new EdgeView(graphView.getGraph(), firstSelectionNode, n,1 );
+            graphView.addEdges(ne);
+            resetNewEdgeCreation();
+        }
+    }
+
+    private void startNewEdgeCreation(NodeView startinNode) {
+        firstSelectionNode = startinNode;
+        graphView.setHelperOriginPos(firstSelectionNode.getCenterX(), firstSelectionNode.getCenterY());
+        startNewEdgeHelp(true);
+    }
+
+    private void resetNewEdgeCreation() {
+        firstSelectionNode = null;
+        startNewEdgeHelp(false);
+        updateScene();
     }
 
     private void startNewEdgeHelp(boolean start) {
@@ -435,22 +440,34 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
 
     private void showElPane(Node n) {
         try {
-            if(n instanceof  NodeView){
-                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/nodePane.fxml"));
-                    Parent root = loader.load();
-                    elPane.getChildren().setAll(root);
-                    NodePaneController nodeCtrl = loader.getController();
-                    nodeCtrl.setNode((NodeView)n, graphView);
-            }else if(n instanceof  EdgeView){
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/edgePane.fxml"));
-                Parent root = loader.load();
-                elPane.getChildren().setAll(root);
-                EdgePaneController edgePaneController = loader.getController();
-                edgePaneController.setEdge( (EdgeView) n, graphView);
-            }
+            tryShowElPane(n);
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void tryShowElPane(Node n) throws IOException {
+        if(n instanceof  NodeView){
+            showNodeViewPane((NodeView) n);
+        }else if(n instanceof  EdgeView){
+            shoeEdgeViewPane((EdgeView) n);
+        }
+    }
+
+    private void shoeEdgeViewPane(EdgeView n) throws IOException {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/edgePane.fxml"));
+        Parent root = loader.load();
+        elPane.getChildren().setAll(root);
+        EdgePaneController edgePaneController = loader.getController();
+        edgePaneController.setEdge(n, graphView);
+    }
+
+    private void showNodeViewPane(NodeView n) throws IOException {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/nodePane.fxml"));
+        Parent root = loader.load();
+        elPane.getChildren().setAll(root);
+        NodePaneController nodeCtrl = loader.getController();
+        nodeCtrl.setNode(n, graphView);
     }
 
     private GraphView buildDefaultTree() {
@@ -468,28 +485,30 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
     }
 
     public void close(WindowEvent event) {
-
         if(event.isConsumed()) return;
+        if (graphView == null) Platform.exit();
+        askUserToClose(event);
+    }
 
-        if (graphView != null) {
-            ButtonType no = new ButtonType("No", ButtonBar.ButtonData.NO);
-            ButtonType yes = new ButtonType("Yes", ButtonBar.ButtonData.YES);
+    private void askUserToClose(WindowEvent event) {
+        Optional<ButtonType> result = showAndWaitCloseAlert();
+        if(result.isEmpty()) return;
 
-            Alert walert = new Alert(Alert.AlertType.WARNING, "Are you sure you want to quit?", no, yes);
-            walert.setHeaderText("Quitting");
-
-            Optional<ButtonType> result = walert.showAndWait();
-            ButtonType button = null;
-            if(result.isPresent()) button = result.get();
-            if ( button!=null && button == yes) {
-                Platform.exit();
-            }else{
-                event.consume();
-            }
-        }else{
+        ButtonType button = result.get();
+        if (button.getButtonData() == ButtonBar.ButtonData.YES) {
             Platform.exit();
+        }else{
+            event.consume();
         }
+    }
 
+    private Optional<ButtonType> showAndWaitCloseAlert() {
+        ButtonType no = new ButtonType("No", ButtonBar.ButtonData.NO);
+        ButtonType yes = new ButtonType("Yes", ButtonBar.ButtonData.YES);
+
+        Alert alert = new Alert(Alert.AlertType.WARNING, "Are you sure you want to quit?", no, yes);
+        alert.setHeaderText("Quitting");
+        return alert.showAndWait();
     }
 
     private void updateScene() {
@@ -510,8 +529,12 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
 
     @Override
     public void onGraphChanged(GraphView gv) {
-        boolean validGraph = gv!=null && gv.getGraph()!=null;
+        boolean validGraph = isValidGraph(gv);
+        disableUIElements(validGraph);
+        updateScene();
+    }
 
+    private void disableUIElements(boolean validGraph) {
         for(Menu mi : mainBar.getMenus()){
             disableMenuItems(mi, !validGraph);
         }
@@ -521,8 +544,10 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
         miQuit.setDisable(false);
         miFileNew.setDisable(false);
         miAbout.setDisable(false);
+    }
 
-        updateScene();
+    private boolean isValidGraph(GraphView gv) {
+        return gv!=null && gv.getGraph()!=null;
     }
 
     private void disableMenuItems(Menu m, boolean disable){

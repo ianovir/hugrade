@@ -24,9 +24,6 @@ public class BellmanFordSolver extends PathSolver{
 
     @Override
     public int[] solve(int source, int target, GraphSolverSettings settings) {
-
-        graph.sortNodes();
-
         //initialize
         float[][] tm = Graph2TransMatrixConverter.convert(graph);
         handleEdges(tm, settings);

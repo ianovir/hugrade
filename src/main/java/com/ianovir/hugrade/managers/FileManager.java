@@ -19,6 +19,7 @@ public class FileManager {
             String content = gson.toJson(graphView.getGraph());
             fw = new FileWriter(file.getAbsolutePath());
             fw.write(content);
+            System.out.printf("Saved to %s",file.getAbsolutePath());
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -42,8 +43,7 @@ public class FileManager {
         {
             Gson gson = new Gson();
             Graph graph = gson.fromJson(reader, Graph.class);
-
-            graph.sortNodes();
+            System.out.printf("Loaded graph from %s",file.getAbsolutePath());
             return new GraphView(graph);
         } catch (IOException e) {
             e.printStackTrace();

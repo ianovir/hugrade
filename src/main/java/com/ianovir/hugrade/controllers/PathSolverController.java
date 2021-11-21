@@ -40,7 +40,6 @@ public class PathSolverController {
         //TODO: implement export
         btnExport.setDisable(true);
 
-        graph.sortNodes();
         cbOrigin.setItems(FXCollections.observableArrayList(graph.getNodes()));
         cbDestination.setItems(FXCollections.observableArrayList(graph.getNodes()));
 

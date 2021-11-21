@@ -63,7 +63,6 @@ public class EdgeView extends CubicCurve {
     }
 
     private void setupUpdateListeners() {
-        //controls' position binding:
         controlXUpdater = observable -> {
             double alpha = getAngle(origin, destination);
             double[] dirs = getControlDirByAngle(alpha);
@@ -115,17 +114,7 @@ public class EdgeView extends CubicCurve {
         triangle.getTransforms().add(triangleRotation);
 
         InvalidationListener terminalUpdater = o -> {
-            double sx = getControlX2();
-            double sy = getControlY2();
-            double ex = getEndX();
-            double ey = getEndY();
-
-            triangle.setTranslateX(ex);
-            triangle.setTranslateY(ey);
-            double a = getAngle(sx, sy, ex, ey);
-            double[] dir = getControlDirByAngle(a);
-            //change direction depending on angle
-            triangleRotation.setAngle(dir[1]==0? a*180d/Math.PI : -a*180d/Math.PI);
+            refreshArrowTriangle(triangleRotation);
         };
 
         // add terminalUpdater to properties
@@ -137,6 +126,20 @@ public class EdgeView extends CubicCurve {
         terminalUpdater.invalidated(null);
 
         arrowEnd = new Group(triangle);
+    }
+
+    private void refreshArrowTriangle(Rotate triangleRotation) {
+        double sx = getControlX2();
+        double sy = getControlY2();
+        double ex = getEndX();
+        double ey = getEndY();
+
+        triangle.setTranslateX(ex);
+        triangle.setTranslateY(ey);
+        double a = getAngle(sx, sy, ex, ey);
+        double[] dir = getControlDirByAngle(a);
+        //change direction depending on angle
+        triangleRotation.setAngle(dir[1]==0? a*180d/Math.PI : -a*180d/Math.PI);
     }
 
     public NodeView getOrigin() {
@@ -199,20 +202,28 @@ public class EdgeView extends CubicCurve {
     public void refresh() {
         weightLabel.setText( String.format("%.1f", mEdge.getWeight()));
         if(mEdge.getWeight()!=0){
-            setStroke(isSelected? COLOR_SELECTED : getColor());
-            weightLabel.setStroke(isSelected? COLOR_SELECTED : getColor());
-            triangle.setStroke(isSelected? COLOR_SELECTED : getColor());
-            triangle.setFill(isSelected? COLOR_SELECTED : getColor());
-            getStrokeDashArray().clear();
+            refreshWeightedEdge();
         }else{
-            setStroke(isSelected? COLOR_SELECTED : COLOR_USELESS);
-            weightLabel.setStroke(isSelected? COLOR_SELECTED : COLOR_USELESS);
-            triangle.setStroke(isSelected? COLOR_SELECTED : COLOR_USELESS);
-            triangle.setFill(isSelected? COLOR_SELECTED : COLOR_USELESS);
-            getStrokeDashArray().addAll(5d, 5d);
+            refreshUselessEdge();
         }
         controlXUpdater.invalidated(null);
         controlYUpdater.invalidated(null);
+    }
+
+    private void refreshUselessEdge() {
+        setStroke(isSelected? COLOR_SELECTED : COLOR_USELESS);
+        weightLabel.setStroke(isSelected? COLOR_SELECTED : COLOR_USELESS);
+        triangle.setStroke(isSelected? COLOR_SELECTED : COLOR_USELESS);
+        triangle.setFill(isSelected? COLOR_SELECTED : COLOR_USELESS);
+        getStrokeDashArray().addAll(5d, 5d);
+    }
+
+    private void refreshWeightedEdge() {
+        setStroke(isSelected? COLOR_SELECTED : getColor());
+        weightLabel.setStroke(isSelected? COLOR_SELECTED : getColor());
+        triangle.setStroke(isSelected? COLOR_SELECTED : getColor());
+        triangle.setFill(isSelected? COLOR_SELECTED : getColor());
+        getStrokeDashArray().clear();
     }
 
     /**

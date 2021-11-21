@@ -125,11 +125,6 @@ public class Graph {
     }
 
 
-    @Deprecated
-    public void sortNodes(){
-        //TODO: delete
-    }
-
     public void changeNodeID(int oldID, int newID){
         swapEdgesReferences(oldID, newID);
         Collections.swap(nodes, oldID, newID);

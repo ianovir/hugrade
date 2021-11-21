@@ -22,8 +22,6 @@ public class TransMatrix2CsvConverter {
         StringBuilder sb = new StringBuilder();
 
         if(graph!=null){
-            graph.sortNodes();
-
             //csv header
             sb.append(graph.getNodes().stream().map(GNode::getName).collect(Collectors.joining(",")));
             sb.append("\n");
