@@ -4,10 +4,10 @@ import com.ianovir.hugrade.views.EdgeView;
 import com.ianovir.hugrade.views.NodeView;
 import com.ianovir.hugrade.views.GraphView;
 import javafx.collections.FXCollections;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
@@ -23,14 +23,17 @@ public class NodePaneController {
     public Label labelId;
     public Label muLbl;
     public FlowPane valueGroup;
+    public AnchorPane mainPane;
 
     private NodeView node;
     private GraphView graphView;
     private static Color lastColor = Color.ORANGE;
+    private boolean renamingContinues;
 
     public void setNode(NodeView n, GraphView graphV){
         this.node = n;
         this.graphView = graphV;
+        renamingContinues = false;
 
         setupLabels();
 
@@ -84,7 +87,6 @@ public class NodePaneController {
             }catch(NumberFormatException ex){
                 node.setValue(0f);
             }
-
         });
     }
 
@@ -178,5 +180,33 @@ public class NodePaneController {
 
     public static void setLastColor(Color lastColor) {
         NodePaneController.lastColor = lastColor;
+    }
+
+    public void onKeyPress(KeyEvent e) {
+        if (e.getCode().isDigitKey() || e.getCode().isLetterKey()) {
+            renameNode(e);
+        }else
+        if (e.getCode() == KeyCode.BACK_SPACE) {
+            backSpaceNodeName();
+        }
+    }
+
+    private void renameNode(javafx.scene.input.KeyEvent e) {
+        if(renamingContinues){
+            tfName.setText(tfName.getText() + e.getText());
+        }else{
+            tfName.setText(e.getText());
+            renamingContinues = true;
+        }
+    }
+
+    private void backSpaceNodeName() {
+        if(renamingContinues){
+            int end = tfName.getLength() - 2;
+            if(end>0) tfName.setText(tfName.getText(0, end));
+        }else{
+            tfName.setText("");
+            renamingContinues = true;
+        }
     }
 }

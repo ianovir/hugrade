@@ -19,6 +19,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
@@ -76,6 +77,7 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
 
     private final FileChooser.ExtensionFilter gmlExtFilter =
             new FileChooser.ExtensionFilter("Graph Modelling Language (*.gml)", "*.gml");
+    private NodePaneController mNodePaneController;
 
     public void init(Application application)  {
 
@@ -319,12 +321,21 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
     }
 
     private void setupKeyboardInteractions() {
-        graphContentPane.getScene().setOnKeyPressed(e -> {
+        graphContentPane.setOnKeyPressed(e -> {
             if (e.getCode() == KeyCode.DELETE) {
                 deleteSelectedNodes(graphView.getSelectedNodes());
                 deleteSelectedEdges(graphView.getSelectedEdges());
+            }else{
+                propagateKeyEvent2ElPanes(e);
             }
         });
+        graphContentPane.getScene().onKeyPressedProperty().bind(graphContentPane.onKeyPressedProperty());
+    }
+
+    private void propagateKeyEvent2ElPanes(KeyEvent e) {
+        if(mNodePaneController!=null){
+            mNodePaneController.onKeyPress(e);
+        }
     }
 
     private void deleteSelectedEdges(ArrayList<EdgeView> selEdges) {
@@ -452,11 +463,11 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
         if(n instanceof  NodeView){
             showNodeViewPane((NodeView) n);
         }else if(n instanceof  EdgeView){
-            shoeEdgeViewPane((EdgeView) n);
+            showEdgeViewPane((EdgeView) n);
         }
     }
 
-    private void shoeEdgeViewPane(EdgeView n) throws IOException {
+    private void showEdgeViewPane(EdgeView n) throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/edgePane.fxml"));
         Parent root = loader.load();
         elPane.getChildren().setAll(root);
@@ -467,8 +478,10 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
     private void showNodeViewPane(NodeView n) throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/nodePane.fxml"));
         Parent root = loader.load();
+        root.setFocusTraversable(true);
         elPane.getChildren().setAll(root);
         NodePaneController nodeCtrl = loader.getController();
+        this.mNodePaneController = nodeCtrl;
         nodeCtrl.setNode(n, graphView);
     }
 

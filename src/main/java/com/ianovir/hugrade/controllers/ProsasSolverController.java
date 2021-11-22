@@ -46,48 +46,59 @@ public class ProsasSolverController {
         //TODO: implement export
         btnExport.setDisable(true);
 
-        btnSolve.setOnAction(event -> {
-            tvResult.getItems().clear();
-            updateData();
+        btnSolve.setOnAction(event -> actionSolve());
 
-            //ID column
-            TableColumn<float[], Integer> idCol = new TableColumn<>("ID");
-            idCol.setSortable(false);
-            idCol.setEditable(false);
-            idCol.setCellValueFactory(param -> new SimpleIntegerProperty((int) param.getValue()[0]).asObject());
-            tvResult.getColumns().add(idCol);
+    }
 
-            //Name column
-            TableColumn<float[], String> nameCol = new TableColumn<>("Name");
-            nameCol.setSortable(false);
-            nameCol.setEditable(false);
-            nameCol.setCellValueFactory(param -> new SimpleStringProperty(
-                    graphView.getGraph()
-                            .getNodeById((int)param.getValue()[0])
-                            .getName())
-            );
-            tvResult.getColumns().add(nameCol);
+    private void actionSolve() {
+        tvResult.getItems().clear();
+        updateData();
 
-            //value column
-            TableColumn<float[], Double> valCol = new TableColumn<>("Probability");
-            valCol.setSortable(false);
-            valCol.setEditable(false);
-            valCol.setCellValueFactory(param -> new SimpleDoubleProperty(param.getValue()[1]).asObject());
-            tvResult.getColumns().add(valCol);
+        setupIdColumn();
+        setupNameColumn();
+        setupValueColumn();
+        setupRowClickFactory();
 
-            //select node on row click
-            tvResult.setRowFactory(tv -> {
-                TableRow<float[]> row = new TableRow<>();
-                row.setOnMouseClicked(e -> graphView.selectNodeById((int) tvResult.getSelectionModel().getSelectedItem()[0]));
-                return row;
-            });
+        tvResult.setItems(data);
+        tvResult.refresh();
 
-            tvResult.setItems(data);
-            tvResult.refresh();
+        btnSolve.setDisable(true);
+    }
 
-            btnSolve.setDisable(true);
+    private void setupRowClickFactory() {
+        tvResult.setRowFactory(tv -> {
+            TableRow<float[]> row = new TableRow<>();
+            row.setOnMouseClicked(e -> graphView.selectNodeById((int) tvResult.getSelectionModel().getSelectedItem()[0]));
+            return row;
         });
+    }
 
+    private void setupValueColumn() {
+        TableColumn<float[], String> valCol = new TableColumn<>("Probability");
+        valCol.setSortable(false);
+        valCol.setEditable(false);
+        valCol.setCellValueFactory(param -> new SimpleStringProperty(String.valueOf(param.getValue()[1])));
+        tvResult.getColumns().add(valCol);
+    }
+
+    private void setupNameColumn() {
+        TableColumn<float[], String> nameCol = new TableColumn<>("Name");
+        nameCol.setSortable(false);
+        nameCol.setEditable(false);
+        nameCol.setCellValueFactory(param -> new SimpleStringProperty(
+                graphView.getGraph()
+                        .getNodeById((int)param.getValue()[0])
+                        .getName())
+        );
+        tvResult.getColumns().add(nameCol);
+    }
+
+    private void setupIdColumn() {
+        TableColumn<float[], Integer> idCol = new TableColumn<>("ID");
+        idCol.setSortable(false);
+        idCol.setEditable(false);
+        idCol.setCellValueFactory(param -> new SimpleIntegerProperty((int) param.getValue()[0]).asObject());
+        tvResult.getColumns().add(idCol);
     }
 
     private void updateData() {
@@ -104,16 +115,30 @@ public class ProsasSolverController {
         };
 
         task.setOnSucceeded(event -> {
-            bar.setVisible(false);
-            float[][]  res = task.getValue();
-            if(res!=null){
-                data.addAll(Arrays.asList(res));
-            }
-            System.out.println(Arrays.deepToString(res));
+            onSolverSucceeded(task);
         });
 
         bar.setVisible(true);
         new Thread(task).start();
+    }
+
+    private void onSolverSucceeded(Task<float[][]> task) {
+        bar.setVisible(false);
+        float[][]  res = task.getValue();
+        if(res!=null){
+            roundResult(res);
+            data.addAll(Arrays.asList(res));
+        }
+        System.out.println(Arrays.deepToString(res));
+    }
+
+    private void roundResult(float[][] res) {
+        for(int i =0;i<res.length;i++){
+            for(int j =0;j<res[i].length;j++) {
+                res[i][j] = (float) Math.round(res[i][j] * 1000) / 1000;
+                System.out.println(res[i][j]);
+            }
+        }
     }
 
 }

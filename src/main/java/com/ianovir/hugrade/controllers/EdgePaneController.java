@@ -9,8 +9,12 @@ import com.ianovir.hugrade.views.NodeView;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.layout.AnchorPane;
 
 import java.text.DecimalFormat;
+
+import static java.lang.Float.parseFloat;
 
 public class EdgePaneController {
 
@@ -22,6 +26,7 @@ public class EdgePaneController {
     public TextArea taDescription;
     public Label muLbl;
     public Button btnSwap;
+    public AnchorPane mainPane;
 
     private EdgeView edgeView;
 
@@ -31,10 +36,10 @@ public class EdgePaneController {
 
     @FXML
     public void initialize(){
-        setWeightValueChagneListener();
+        setWeightValueChangeListener();
     }
 
-    private void setWeightValueChagneListener() {
+    private void setWeightValueChangeListener() {
         tfWeight.textProperty().addListener((observable, oldValue, newValue) -> {
             try{
                 tryUpdateNewWeight(newValue);
@@ -45,7 +50,7 @@ public class EdgePaneController {
     }
 
     private void tryUpdateNewWeight(String newValue) {
-        float v = Float.parseFloat(newValue);
+        float v = parseFloat(newValue);
         edgeView.setWeight(v);
     }
 
@@ -67,7 +72,7 @@ public class EdgePaneController {
     private void setupWeightText() {
         tfWeight.setText( df.format(edgeView.getWeight()));
         tfWeight.textProperty().addListener((observable, oldValue, newValue) ->{
-                edgeView.setWeight(Float.parseFloat(newValue));
+                edgeView.setWeight(parseFloat(newValue));
             }
         );
     }
@@ -140,5 +145,6 @@ public class EdgePaneController {
     private boolean edgeExists(int source, int destination) {
         return graph.edgeExists(source, destination);
     }
+
 
 }

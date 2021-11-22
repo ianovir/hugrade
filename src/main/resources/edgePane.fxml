@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane prefHeight="404.0" prefWidth="222.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ianovir.hugrade.controllers.EdgePaneController">
+<AnchorPane fx:id="mainPane" prefHeight="404.0" prefWidth="222.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ianovir.hugrade.controllers.EdgePaneController">
     <FlowPane orientation="VERTICAL" prefHeight="426.0" prefWidth="222.0">
         <Label text="Edge">
             <FlowPane.margin>
