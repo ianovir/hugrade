@@ -91,6 +91,7 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
 
         updateScene();
         onGraphChanged(null);
+        printStartingHints();
     }
 
     private void redirectOutput() {
@@ -123,6 +124,7 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
         graphView = buildDefaultTree();
         graphView.addSelectionObserver(this);
         onGraphChanged(graphView);
+        printHints();
     }
 
     private void actionClearNullEdges() {
@@ -558,5 +560,15 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
                 mi.setDisable(disable);
             }
         }
+    }
+
+    private void printStartingHints() {
+        System.out.println("Welcome to Hugrade!");
+        System.out.println("Click on File->New to create a new project");
+    }
+
+    private void printHints() {
+        System.out.println("Double click to create a Node");
+        System.out.println("Right click to create an Edge between two Nodes");
     }
 }

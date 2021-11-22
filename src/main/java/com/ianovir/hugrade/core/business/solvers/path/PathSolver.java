@@ -17,17 +17,17 @@ public abstract class PathSolver implements GraphSolver {
      */
     public enum BidirectionalConnectionOp {
         /**
+         * The edge connecting specific source and destination node is chosen
+         */
+        DIRECT,
+        /**
          * The edge with the lightest weight is chosen
          */
         LIGHTEST,
         /**
          * The edge with the heaviest weight is chosen
          */
-        HEAVIEST,
-        /**
-         * The edge connecting specific source and destination node is chosen
-         */
-        DIRECT;
+        HEAVIEST;
     }
 
     /**
@@ -35,17 +35,17 @@ public abstract class PathSolver implements GraphSolver {
      */
     public enum NegativeEdgesOp{
         /**
+         * Do not change negative weights (for algorithms supporting negative edges)
+         */
+        AS_IS,
+        /**
          * weight is considered as absolute value
          */
         ABSOLUTE,
         /**
          *  weight is considered as 0 (ignore weight)
          */
-        ZERO,
-        /**
-         * Do not change negative weights (for algorithms supporting negative edges)
-         */
-        AS_IS;
+        ZERO;
     }
 
     protected final Graph graph;
@@ -74,38 +74,37 @@ public abstract class PathSolver implements GraphSolver {
 
     public static void handleEdges(float[][] tm, GraphSolverSettings settings) {
         for(int r=0;r<tm.length;r++){
-
-            //eliminating edges n->n
+            //deleting diagonal edges n->n
             if(tm[r][r]!=0) tm[r][r]=0;
-
             for(int c=0;c<tm[r].length;c++){
-                //negative
-                if(tm[r][c]<0){
-                    switch (settings.getNegEdgesOp()){
-                        case ZERO:
-                            tm[r][c]= 0;
-                            break;
-                        case ABSOLUTE:
-                            tm[r][c]= Math.abs(tm[r][c]= 0);
-                            break;
-                        case AS_IS:
-                            break;
-                    }
-                }
+                handleNegativeEdges(tm, settings, r, c);
+                handleBidirectionalEdges(tm, settings, r, c);
+            }
+        }
+    }
 
-                //bidirectional
-                if((tm[r][c]!=0 || tm[c][r]!=0) && settings.getmEdgesOp()== BidirectionalConnectionOp.LIGHTEST){
-                    float min = Math.min(tm[r][c], tm[c][r]);
-                    if(min!=0){
-                        tm[r][c] = tm[c][r] = min;
-                    }else{
-                        tm[r][c] = tm[c][r] = Math.max(tm[r][c], tm[c][r]);
-                    }
-                }
-                if(settings.getmEdgesOp()== BidirectionalConnectionOp.DIRECT){
-                    tm[c][r] = 0f;
-                }
+    private static void handleBidirectionalEdges(float[][] tm, GraphSolverSettings settings, int r, int c) {
+        if((tm[r][c]!=0 || tm[c][r]!=0) && settings.getmEdgesOp()== BidirectionalConnectionOp.LIGHTEST){
+            float min = Math.min(tm[r][c], tm[c][r]);
+            if(min!=0){
+                tm[r][c] = tm[c][r] = min;
+            }else{
+                tm[r][c] = tm[c][r] = Math.max(tm[r][c], tm[c][r]);
+            }
+        }
+    }
 
+    private static void handleNegativeEdges(float[][] tm, GraphSolverSettings settings, int r, int c) {
+        if(tm[r][c]<0){
+            switch (settings.getNegEdgesOp()){
+                case ZERO:
+                    tm[r][c]= 0;
+                    break;
+                case ABSOLUTE:
+                    tm[r][c]= Math.abs(tm[r][c]= 0);
+                    break;
+                case AS_IS:
+                    break;
             }
         }
     }
@@ -124,7 +123,6 @@ public abstract class PathSolver implements GraphSolver {
                 currentEdge = bidirectionalEdge;
             }
         }
-        if(currentEdge==null) return null;
 
         //negative weight
         if(currentEdge.getWeight()<0){

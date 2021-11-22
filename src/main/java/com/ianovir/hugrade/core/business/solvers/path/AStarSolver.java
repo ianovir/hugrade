@@ -29,13 +29,8 @@ public class AStarSolver extends PathSolver{
 
         openSet.add(source);
 
-        float[] gScore = new float[graph.getNodes().size()];
-        Arrays.fill(gScore, Float.MAX_VALUE);
-        gScore[source] = 0f;
-
-        float[] fScore = new float[graph.getNodes().size()];
-        Arrays.fill(fScore, Float.MAX_VALUE);
-        fScore[source] = heuristicFunction(source);
+        float[] gScore = initGScore(source);
+        float[] fScore = initFScore(source);
 
         while(!openSet.isEmpty()){
             //the node in openSet having the lowest fScore[] value
@@ -71,6 +66,20 @@ public class AStarSolver extends PathSolver{
             }
         }
         return null;
+    }
+
+    private float[] initFScore(int source) {
+        float[] fScore = new float[graph.getNodes().size()];
+        Arrays.fill(fScore, Float.MAX_VALUE);
+        fScore[source] = heuristicFunction(source);
+        return fScore;
+    }
+
+    private float[] initGScore(int source) {
+        float[] gScore = new float[graph.getNodes().size()];
+        Arrays.fill(gScore, Float.MAX_VALUE);
+        gScore[source] = 0f;
+        return gScore;
     }
 
     public ArrayList<Integer> reconstructPath(Map<Integer, Integer> cameFrom, int current){

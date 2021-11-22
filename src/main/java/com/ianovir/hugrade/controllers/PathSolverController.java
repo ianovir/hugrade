@@ -43,49 +43,7 @@ public class PathSolverController {
         cbOrigin.setItems(FXCollections.observableArrayList(graph.getNodes()));
         cbDestination.setItems(FXCollections.observableArrayList(graph.getNodes()));
 
-        btnSolve.setOnAction(event -> {
-            graphView.clearSelection();
-            tablePath.getItems().clear();
-
-            if(cbOrigin.getSelectionModel().getSelectedItem()==null ||
-                    cbDestination.getSelectionModel().getSelectedItem()==null) return;
-
-            GNode srcNode = cbOrigin.getSelectionModel().getSelectedItem();
-            GNode dstNode = cbDestination.getSelectionModel().getSelectedItem();
-
-            int src = graph.getNodeId(srcNode);
-            int dst = graph.getNodeId(dstNode);
-
-            Task<int[]> task = new Task<>() {
-                @Override
-                public int[] call() {
-                    return solver.solve(src, dst,
-                            new GraphSolverSettings(
-                                    cbBidConn.getSelectionModel().getSelectedItem(),
-                                    cbNegEdges.getSelectionModel().getSelectedItem()
-                            )
-                    );
-                }
-            };
-
-            task.setOnSucceeded(e -> {
-                bar.setVisible(false);
-                int[] res = task.getValue();
-                if(res!=null){
-                    updateMatrix(res, solver.getCosts());
-                    graphView.selectNodes(res);
-                }else{
-                    Alert alert = new Alert(Alert.AlertType.WARNING);
-                    alert.setTitle("Something gone wrong...");
-                    alert.setHeaderText("Result is null");
-                    alert.setContentText("It looks like there is no optimal path between the selected nodes.");
-                }
-            });
-
-            bar.setVisible(true);
-            new Thread(task).start();
-
-        });
+        btnSolve.setOnAction(event -> actionSolve(graphView, solver));
 
         cbBidConn.getItems().setAll(PathSolver.BidirectionalConnectionOp.values());
         cbNegEdges.getItems().setAll(PathSolver.NegativeEdgesOp.values());
@@ -94,35 +52,69 @@ public class PathSolverController {
         cbNegEdges.getSelectionModel().select(0);
     }
 
+    private void actionSolve(GraphView graphView, PathSolver solver) {
+        graphView.clearSelection();
+        tablePath.getItems().clear();
+
+        if(cbOrigin.getSelectionModel().getSelectedItem()==null ||
+                cbDestination.getSelectionModel().getSelectedItem()==null) return;
+
+        GNode srcNode = cbOrigin.getSelectionModel().getSelectedItem();
+        GNode dstNode = cbDestination.getSelectionModel().getSelectedItem();
+
+        int src = graph.getNodeId(srcNode);
+        int dst = graph.getNodeId(dstNode);
+
+        Task<int[]> task = prepareExecutionTask(graphView, solver, src, dst);
+
+        bar.setVisible(true);
+        new Thread(task).start();
+    }
+
+    private Task<int[]> prepareExecutionTask(GraphView graphView, PathSolver solver, int src, int dst) {
+        Task<int[]> task = new Task<>() {
+            @Override
+            public int[] call() {
+                return solver.solve(src, dst,
+                        new GraphSolverSettings(
+                                cbBidConn.getSelectionModel().getSelectedItem(),
+                                cbNegEdges.getSelectionModel().getSelectedItem()
+                        )
+                );
+            }
+        };
+
+        task.setOnSucceeded(e -> {
+            bar.setVisible(false);
+            int[] res = task.getValue();
+            if(res!=null){
+                updateMatrix(res, solver.getCosts());
+                graphView.selectNodes(res);
+            }else{
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Something gone wrong...");
+                alert.setHeaderText("Result is null");
+                alert.setContentText("It looks like there is no optimal path between the selected nodes.");
+            }
+        });
+        return task;
+    }
+
     private void updateMatrix(int[] res, float[][] costs) {
         tablePath.getColumns().clear();
         List<Integer> boxedRes = Arrays.stream(res).boxed().collect(Collectors.toList());
 
-        TableColumn<Integer, String> idColumn = new TableColumn<>("ID");
-        idColumn.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().toString()));
-        idColumn.setEditable(false);
-        idColumn.setSortable(false);
+        TableColumn<Integer, String> idColumn = setupIdColumn();
+        TableColumn<Integer, String> nodeColumn = setupNodeColumn();
+        TableColumn<Integer, String> partialCostColumn = setupPartialCostColumn(costs, boxedRes);
+        TableColumn<Integer, String> totalCostColumn = setupTotalCostColumn(costs, boxedRes);
+        setupRowFactory();
 
-        TableColumn<Integer, String> nodeColumn = new TableColumn<>("Node");
-        nodeColumn.setCellValueFactory(param -> new SimpleStringProperty(graph.getNodeById(param.getValue()).getName()));
-        nodeColumn.setEditable(false);
-        nodeColumn.setSortable(false);
+        tablePath.setItems(FXCollections.observableArrayList(boxedRes));
+        tablePath.getColumns().addAll(idColumn, nodeColumn, partialCostColumn, totalCostColumn);
+    }
 
-        TableColumn<Integer, String> partialCostColumn = new TableColumn<>("Partial cost");
-        partialCostColumn.setCellValueFactory(param -> new SimpleStringProperty(
-                String.valueOf(costs[boxedRes.indexOf(param.getValue())][0]))
-        );
-        partialCostColumn.setEditable(false);
-        partialCostColumn.setSortable(false);
-
-        TableColumn<Integer, String> totalCostColumn = new TableColumn<>("Total cost");
-        totalCostColumn.setCellValueFactory(param -> new SimpleStringProperty(
-                String.valueOf(costs[boxedRes.indexOf(param.getValue())][1]))
-
-        );
-        totalCostColumn.setEditable(false);
-        totalCostColumn.setSortable(false);
-
+    private void setupRowFactory() {
         tablePath.setRowFactory(tv -> {
             TableRow<Integer> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
@@ -132,9 +124,43 @@ public class PathSolverController {
             });
             return row ;
         });
+    }
 
-        tablePath.setItems(FXCollections.observableArrayList(boxedRes));
-        tablePath.getColumns().addAll(idColumn, nodeColumn, partialCostColumn, totalCostColumn);
+    private TableColumn<Integer, String> setupTotalCostColumn(float[][] costs, List<Integer> boxedRes) {
+        TableColumn<Integer, String> totalCostColumn = new TableColumn<>("Total cost");
+        totalCostColumn.setCellValueFactory(param -> new SimpleStringProperty(
+                String.valueOf(costs[boxedRes.indexOf(param.getValue())][1]))
+
+        );
+        totalCostColumn.setEditable(false);
+        totalCostColumn.setSortable(false);
+        return totalCostColumn;
+    }
+
+    private TableColumn<Integer, String> setupPartialCostColumn(float[][] costs, List<Integer> boxedRes) {
+        TableColumn<Integer, String> partialCostColumn = new TableColumn<>("Partial cost");
+        partialCostColumn.setCellValueFactory(param -> new SimpleStringProperty(
+                String.valueOf(costs[boxedRes.indexOf(param.getValue())][0]))
+        );
+        partialCostColumn.setEditable(false);
+        partialCostColumn.setSortable(false);
+        return partialCostColumn;
+    }
+
+    private TableColumn<Integer, String> setupNodeColumn() {
+        TableColumn<Integer, String> nodeColumn = new TableColumn<>("Node");
+        nodeColumn.setCellValueFactory(param -> new SimpleStringProperty(graph.getNodeById(param.getValue()).getName()));
+        nodeColumn.setEditable(false);
+        nodeColumn.setSortable(false);
+        return nodeColumn;
+    }
+
+    private TableColumn<Integer, String> setupIdColumn() {
+        TableColumn<Integer, String> idColumn = new TableColumn<>("ID");
+        idColumn.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().toString()));
+        idColumn.setEditable(false);
+        idColumn.setSortable(false);
+        return idColumn;
     }
 
     public void selectNegativeEdgesItem(PathSolver.NegativeEdgesOp op){
