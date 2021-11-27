@@ -97,15 +97,12 @@ public class NodePaneController {
         );
     }
 
-    /**
-     * Configures the list of Edges belonging to the Node
-     */
     private void setupEdgesList() {
         TableColumn<EdgeView, String> fromColumn = new TableColumn<>("From");
         fromColumn.setCellFactory(new Callback<>() {
             @Override
             public TableCell call(final TableColumn<EdgeView, String> param) {
-                final TableCell<EdgeView, String> cell = new TableCell<EdgeView, String>() {
+                final TableCell<EdgeView, String> cell = new TableCell<>() {
                     @Override
                     public void updateItem(String item, boolean empty) {
                         super.updateItem(item, empty);
@@ -209,4 +206,5 @@ public class NodePaneController {
             renamingContinues = true;
         }
     }
+
 }

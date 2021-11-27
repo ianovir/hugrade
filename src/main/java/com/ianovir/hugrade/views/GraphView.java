@@ -16,71 +16,84 @@ import java.util.*;
  * The JFX element representing and wrapping a {@link Graph}.
  */
 public class GraphView {
-    private Graph mGraph;
-    private ObservableList<EdgeView> edges;
-    private ObservableList<NodeView> nodes;
+    private final Graph mGraph;
+    private final ObservableList<EdgeView> edges;
+    private final ObservableList<NodeView> nodes;
 
-    private ArrayList<NodeView> selectedNodes;
-    private ArrayList<EdgeView> selectedEdges;
+    private final ArrayList<NodeView> selectedNodes;
+    private final ArrayList<EdgeView> selectedEdges;
 
     private NodeView helperOrigin;
     private NodeView helperDestination;
 
-    private ArrayList<SelectionObserver> selectionObservers;
+    private final ArrayList<SelectionObserver> selectionObservers;
     private EdgeView helperEdge;
 
     public GraphView(Graph graph){
-        try{
+        selectionObservers = new ArrayList<>();
+        nodes = FXCollections.observableList(new ArrayList<>());
+        edges = FXCollections.observableList(new ArrayList<>());
+        selectedNodes = new ArrayList<>();
+        selectedEdges = new ArrayList<>();
+        this.mGraph = graph;
+        tryInitialize(graph);
 
-            selectionObservers = new ArrayList<>();
+    }
 
-            nodes = FXCollections.observableList(new ArrayList<>());
-            edges = FXCollections.observableList(new ArrayList<>());
-            selectedNodes = new ArrayList<>();
-            selectedEdges = new ArrayList<>();
-            this.mGraph = graph;
+    private void tryInitialize(Graph graph) {
+        if(mGraph ==null) return;
+        initHelperEdge();
+        fillNodes(graph);
+        manageEdges(graph);
+        bindNodesToGraph();
+        bindEdgesToGraph();
+    }
 
-            initHelperEdge();
+    private void bindEdgesToGraph() {
+        edges.addListener(this::onEdgesChanged);
+    }
 
-            if(mGraph !=null){
-                for(GNode n : graph.getNodes()) addNode(new NodeView(n));
-
-                //check for disconnected edges:
-                Iterator<GEdge> edgesIterator = graph.getEdges().iterator();
-                while (edgesIterator.hasNext()) {
-                    GEdge e = edgesIterator.next();
-                    NodeView src = findNodeViewById(e.getSource());
-                    NodeView dst = findNodeViewById(e.getDestination());
-                    if(dst!=null && src!=null)
-                        addEdge(new EdgeView(graph, src, dst,e));
-                    else
-                        edgesIterator.remove();
-                }
-                //binding obs. lists to inner graph object:
-                nodes.addListener((ListChangeListener<NodeView>) c -> {
-                    while (c.next()) {
-                        if(!c.wasPermutated() && !c.wasUpdated()){
-                            for(NodeView nv : c.getAddedSubList()) mGraph.addNodes(nv.getGNode());
-                            for(NodeView nv : c.getRemoved()) mGraph.removeNode(nv.getGNode());
-                        }
-                    }
-                });
-
-                edges.addListener((ListChangeListener<EdgeView>) c -> {
-                while (c.next()) {
-                    if(!c.wasPermutated() && !c.wasUpdated()){
-                        for(EdgeView ev : c.getAddedSubList()) mGraph.addEdges(ev.getEdge());
-                        for(EdgeView ev : c.getRemoved()) mGraph.removeEdge(ev.getEdge());
-                    }
-                }
-
-                c.reset();
-            });
+    private void onEdgesChanged(ListChangeListener.Change<? extends EdgeView> c) {
+        while (c.next()) {
+            if(!c.wasPermutated() && !c.wasUpdated()){
+                for(EdgeView ev : c.getAddedSubList()) mGraph.addEdges(ev.getEdge());
+                for(EdgeView ev : c.getRemoved()) mGraph.removeEdge(ev.getEdge());
             }
-        }catch(Exception e ){
-            e.printStackTrace();
         }
+        c.reset();
+    }
 
+    private void bindNodesToGraph() {
+        nodes.addListener((ListChangeListener<NodeView>) c -> {
+            while (c.next()) {
+                if(!c.wasPermutated() && !c.wasUpdated()){
+                    for(NodeView nv : c.getAddedSubList()) mGraph.addNodes(nv.getGNode());
+                    for(NodeView nv : c.getRemoved()) mGraph.removeNode(nv.getGNode());
+                }
+            }
+        });
+    }
+
+    private void manageEdges(Graph graph) {
+        Iterator<GEdge> edgesIterator = graph.getEdges().iterator();
+        while (edgesIterator.hasNext()) {
+            addOrRemoveEdge(graph, edgesIterator);
+        }
+    }
+
+    private void addOrRemoveEdge(Graph graph, Iterator<GEdge> edgesIterator) {
+        GEdge e = edgesIterator.next();
+        NodeView src = findNodeViewById(e.getSource());
+        NodeView dst = findNodeViewById(e.getDestination());
+        if(dst!=null && src!=null)
+            addEdge(new EdgeView(graph, src, dst,e));
+        else
+            edgesIterator.remove();
+    }
+
+
+    private void fillNodes(Graph graph) {
+        for(GNode n : graph.getNodes()) addNode(new NodeView(n));
     }
 
     private void initHelperEdge() {
@@ -92,7 +105,7 @@ public class GraphView {
 
     private NodeView findNodeViewById(int id) {
         Object[] r = nodes.stream().filter(n -> mGraph.getNodeId(n.getGNode()) == id).toArray();
-        if(r!=null && r.length>0) return (NodeView) r[0];
+        if(r.length>0) return (NodeView) r[0];
         return null;
     }
 

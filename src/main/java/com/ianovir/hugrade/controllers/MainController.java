@@ -121,12 +121,26 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
     }
 
     private void actionNewFile() {
+        Optional<ButtonType> result = showAndWaitNewProjectAlert();
+        if(result.isEmpty()) return;
+        if (isButtonYesResult(result)) {
+            resetCurrentProject();
+        }
+    }
+
+    private void resetCurrentProject() {
         currentFile=null;
         if(graphView!=null) graphView.removeSelectionObserver(this);
         graphView = buildDefaultTree();
         graphView.addSelectionObserver(this);
         onGraphChanged(graphView);
         printHints();
+    }
+
+    private boolean isButtonYesResult(Optional<ButtonType> result) {
+        ButtonType b = ButtonType.NO;
+        if(result.isPresent()) b = result.get();
+        return b.getButtonData() == ButtonBar.ButtonData.YES;
     }
 
     private void actionClearNullEdges() {
@@ -142,13 +156,16 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
         fs.getExtensionFilters().add(gmlExtFilter);
         if(currentFile!=null) fs.setInitialDirectory(currentFile.getParentFile());
         File file = fs.showSaveDialog(mainPane.getScene().getWindow());
-        if(file!=null){
-            String content = Graph2GMLConverter.convert(graphView.getGraph());
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-                writer.write(content);
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
+        exportGml(file);
+    }
+
+    private void exportGml(File file) {
+        if(file ==null) return;
+        String content = Graph2GMLConverter.convert(graphView.getGraph());
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+            writer.write(content);
+        } catch (IOException ex) {
+            ex.printStackTrace();
         }
     }
 
@@ -184,15 +201,18 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
     }
 
     private void launchDijkstraSPSolver() {
-        launchSolverWindow("Dijkstra path solver", new DijkstraSolver(graphView.getGraph()));
+        launchSolverWindow("Dijkstra path solver",
+                new DijkstraSolver(graphView.getGraph()));
     }
 
     private void launchAStarSPSolver() {
-        launchSolverWindow("A* solver", new AStarSolver(graphView.getGraph()));
+        launchSolverWindow("A* solver",
+                new AStarSolver(graphView.getGraph()));
     }
 
     private void launchBellmanFordWindow() {
-       var ctrl = launchSolverWindow("Bellman-Ford solver", new BellmanFordSolver(graphView.getGraph()));
+       var ctrl = launchSolverWindow("Bellman-Ford solver",
+               new BellmanFordSolver(graphView.getGraph()));
        if(ctrl!=null){
            ctrl.selectNegativeEdgesItem(PathSolver.NegativeEdgesOp.AS_IS);
            ctrl.setNegativeEdgesDisabled(true);
@@ -377,22 +397,34 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
         if(graphView==null) return;
         double mx = mouseEvent.getX() ;
         double my = mouseEvent.getY();
+        Node n = checkHitAndSelect(mx, my);
+
+        if (mouseEvent.getButton()== MouseButton.PRIMARY)
+            handlePrimaryClickMouseAction(mouseEvent, mx, my, n);
+
+         else if(mouseEvent.getButton()== MouseButton.SECONDARY) {
+            handleSecondaryClickMouseAction(n);
+        }
+    }
+
+    private Node checkHitAndSelect(double mx, double my) {
         Node n = graphView.hitSomething(mx, my);
         if(n!=null) graphView.select(n);
+        return n;
+    }
 
-        if (mouseEvent.getButton()== MouseButton.PRIMARY) {
-            if (n == null && mouseEvent.getClickCount() == 2) {
-                createNewNode(mx, my);
-            }
+    private void handlePrimaryClickMouseAction(javafx.scene.input.MouseEvent mouseEvent, double mx, double my, Node n) {
+        if (n == null && mouseEvent.getClickCount() == 2) {
+            createNewNode(mx, my);
         }
-         else
-             if(mouseEvent.getButton()== MouseButton.SECONDARY) {
-                 if (n instanceof NodeView) {
-                     updateNewEdgeCreationRoutine(n);
-                 } else {
-                     updateNewEdgeCreationRoutine(null);
-                 }
-             }
+    }
+
+    private void handleSecondaryClickMouseAction(Node n) {
+        if (n instanceof NodeView) {
+            updateNewEdgeCreationRoutine(n);
+        } else {
+            updateNewEdgeCreationRoutine(null);
+        }
     }
 
     private void createNewNode(double mx, double my) {
@@ -509,20 +541,31 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
         Optional<ButtonType> result = showAndWaitCloseAlert();
         if(result.isEmpty()) return;
 
-        ButtonType button = result.get();
-        if (button.getButtonData() == ButtonBar.ButtonData.YES) {
+        if (isButtonYesResult(result)) {
             Platform.exit();
         }else{
             event.consume();
         }
     }
 
+    private Optional<ButtonType> showAndWaitNewProjectAlert() {
+        return showAndWaitWarningAlert("Not saved",
+                "Reset without saving?"
+        );
+    }
+
     private Optional<ButtonType> showAndWaitCloseAlert() {
+        return showAndWaitWarningAlert("Quit",
+                "Are you sure you want to quit?"
+        );
+    }
+
+    private Optional<ButtonType> showAndWaitWarningAlert(String title, String message) {
         ButtonType no = new ButtonType("No", ButtonBar.ButtonData.NO);
         ButtonType yes = new ButtonType("Yes", ButtonBar.ButtonData.YES);
 
-        Alert alert = new Alert(Alert.AlertType.WARNING, "Are you sure you want to quit?", no, yes);
-        alert.setHeaderText("Quitting");
+        Alert alert = new Alert(Alert.AlertType.WARNING, message, no, yes);
+        alert.setHeaderText(title);
         return alert.showAndWait();
     }
 
