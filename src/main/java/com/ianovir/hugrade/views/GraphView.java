@@ -146,8 +146,7 @@ public class GraphView {
     }
 
     public Node hitSomething(double x, double y) {
-        Node n ;
-        n= testHitNodes(x, y);
+        Node n = testHitNodes(x, y);
         if(n==null) n= testHitEdges(x, y);
         return n;
     }
@@ -165,7 +164,7 @@ public class GraphView {
     private EdgeView testHitEdges(double x, double y) {
         clearSelection();
         for(EdgeView e : edges){
-            if(e.intersects(x, y, 0,0)) {
+            if(e.intersects(x, y, 10,10)) {
                 return e;
             }
         }

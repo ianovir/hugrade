@@ -121,11 +121,16 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
     }
 
     private void actionNewFile() {
-        Optional<ButtonType> result = showAndWaitNewProjectAlert();
-        if(result.isEmpty()) return;
-        if (isButtonYesResult(result)) {
+        if(canCreateNewProject()){
             resetCurrentProject();
         }
+    }
+
+    private boolean canCreateNewProject() {
+        if(graphView == null) return true;
+        Optional<ButtonType> result = showAndWaitNewProjectAlert();
+        if(result.isEmpty()) return false;
+        return isButtonYesResult(result);
     }
 
     private void resetCurrentProject() {

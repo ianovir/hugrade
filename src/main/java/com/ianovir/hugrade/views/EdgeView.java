@@ -138,8 +138,11 @@ public class EdgeView extends CubicCurve {
         triangle.setTranslateY(ey);
         double a = getAngle(sx, sy, ex, ey);
         double[] dir = getControlDirByAngle(a);
-        //change direction depending on angle
-        triangleRotation.setAngle(dir[1]==0? a*180d/Math.PI : -a*180d/Math.PI);
+        triangleRotation.setAngle(getAngleFromDirection(a, dir));
+    }
+
+    private double getAngleFromDirection(double a, double[] dir) {
+        return dir[1] == 0 ? a * 180d / Math.PI : -a * 180d / Math.PI;
     }
 
     public NodeView getOrigin() {
@@ -204,13 +207,13 @@ public class EdgeView extends CubicCurve {
         if(mEdge.getWeight()!=0){
             refreshWeightedEdge();
         }else{
-            refreshUselessEdge();
+            refreshZeroEdge();
         }
         controlXUpdater.invalidated(null);
         controlYUpdater.invalidated(null);
     }
 
-    private void refreshUselessEdge() {
+    private void refreshZeroEdge() {
         setStroke(isSelected? COLOR_SELECTED : COLOR_USELESS);
         weightLabel.setStroke(isSelected? COLOR_SELECTED : COLOR_USELESS);
         triangle.setStroke(isSelected? COLOR_SELECTED : COLOR_USELESS);
@@ -243,26 +246,36 @@ public class EdgeView extends CubicCurve {
         return Math.atan2(deltay, deltax);
     }
 
-    /**
-     * Computes optimal directions for the bezier controls, given the angle
-     * of the line origin-destination.
-     * @param a the given angle, in radians
-     * @return the directions along x an y axis as -1/+1
-     */
-    private double[] getControlDirByAngle(double a){
+    private double[] getControlDirByAngle(double angle){
         double[] ret = {0,0};
-        if(a>=-PI_4 && a<PI_4)
+        if(isPointingEast(angle))
             ret[0]=1;
         else
-        if((a>=3*PI_4 && a<Math.PI) || (a>=-Math.PI && a<-3*PI_4))
+        if(isPointingWest(angle))
             ret[0]=-1;
 
-        if(a>=PI_4 && a<3*PI_4)
+        if(isPointingNorth(angle))
             ret[1]=1;
         else
-        if((a>=-3*PI_4 && a<-PI_4) )
+        if(isPointingSouth(angle))
             ret[1]=-1;
         return ret;
+    }
+
+    private boolean isPointingSouth(double angle) {
+        return angle>=-3*PI_4 && angle<-PI_4;
+    }
+
+    private boolean isPointingNorth(double angle) {
+        return angle>=PI_4 && angle<3*PI_4;
+    }
+
+    private boolean isPointingWest(double angle) {
+        return (angle >= 3 * PI_4 && angle < Math.PI) || (angle >= -Math.PI && angle < -3 * PI_4);
+    }
+
+    private boolean isPointingEast(double angle) {
+        return angle>=-PI_4 && angle<PI_4;
     }
 
     public Node[] getContent() {
@@ -281,5 +294,56 @@ public class EdgeView extends CubicCurve {
     @Override
     public String toString(){
         return mEdge.toString();
+    }
+
+    @Override
+    public boolean intersects(double localX, double localY, double localWidth, double localHeight) {
+        boolean intersectsBoundaries = super.intersects(localX, localY, localWidth, localHeight);
+        if(!intersectsBoundaries) return false;
+        return testIntersectsPath(localX, localY, Math.max(localWidth,localHeight), 0.01);
+    }
+
+    private boolean testIntersectsPath(double targetX, double targetY, double radius, double resolution) {
+        double x0 = getStartX();
+        double x1 = getControlX1();
+        double x2 = getControlX2();
+        double x3 = getEndX();
+        double y0 = getStartY();
+        double y1 = getControlY1();
+        double y2 = getControlY2();
+        double y3 = getEndY();
+
+        for(double t = 0.0;t<1.0; t+=resolution){
+            double pathX = getBezierInterpolation(x0, x1, x2, x3, t);
+            double pathY = getBezierInterpolation(y0, y1, y2, y3, t);
+            boolean targetClose = isTargetClose(targetX, targetY, radius, pathX, pathY);
+            if(targetClose) return true;
+        }
+
+        return false;
+
+    }
+
+    private boolean isTargetClose(double targetX, double targetY, double radius, double pathX, double pathY) {
+        double distance = getDistance(targetX, targetY, pathX, pathY);
+        return distance <= radius;
+    }
+
+    private double getDistance(double targetX, double targetY, double pathX, double pathY) {
+        double diffX_2 = Math.pow(targetX - pathX, 2);
+        double diffY_2 = Math.pow(targetY - pathY, 2);
+        return Math.sqrt(diffX_2 + diffY_2);
+    }
+
+    private double getBezierInterpolation(double h0, double h1, double h2, double h3, double t) {
+        return pow3(1 - t) * h0 + 3 * pow2(1 - t) * t * h1 + 3 * (1 - t) * pow2(t) * h2 + pow3(t) * h3;
+    }
+
+    private double pow3(double t) {
+        return  Math.pow(t, 3);
+    }
+
+    private double pow2(double t) {
+        return  Math.pow(t, 2);
     }
 }
