@@ -91,7 +91,6 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
         redirectOutput();
         setupMenuItems();
         setupMouseInteractions();
-        setupMousePanning();
         setupKeyboardInteractions();
 
         updateScene();
@@ -384,26 +383,10 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
     }
 
     private void setupMouseInteractions() {
+        scrollPane.setPannable(true);
         //TODO: not working as expected
         scrollPane.setOnMouseClicked(this::mainMouseClickHandler);
 
-    }
-
-    private void setupMousePanning() {
-        graphContentPane.setOnMousePressed(event -> {
-            if(event.getButton().equals(MouseButton.MIDDLE)) {
-                panPressedX = event.getX();
-                panPressedY = event.getY();
-            }
-        });
-
-        graphContentPane.setOnMouseDragged(event -> {
-            if(event.getButton().equals(MouseButton.MIDDLE)) {
-                scrollPane.setHvalue(scrollPane.getHvalue() - (event.getX() - panPressedX));
-                scrollPane.setVvalue(scrollPane.getVvalue() - (event.getY() - panPressedY));
-                event.consume();
-            }
-        });
     }
 
     private void mainMouseClickHandler(javafx.scene.input.MouseEvent mouseEvent) {
