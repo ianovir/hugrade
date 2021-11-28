@@ -6,10 +6,8 @@ import com.ianovir.hugrade.core.business.solvers.path.BellmanFordSolver;
 import com.ianovir.hugrade.core.business.solvers.path.DijkstraSolver;
 import com.ianovir.hugrade.core.business.solvers.path.PathSolver;
 import com.ianovir.hugrade.core.models.Graph;
-import com.ianovir.hugrade.views.EdgeView;
-import com.ianovir.hugrade.views.NodeView;
-import com.ianovir.hugrade.views.GraphView;
-import com.ianovir.hugrade.views.TransitionMatrixView;
+import com.ianovir.hugrade.managers.HugradeSettings;
+import com.ianovir.hugrade.views.*;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -23,6 +21,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -37,6 +36,7 @@ import static com.ianovir.hugrade.managers.FileManager.saveGraphFile;
 
 public class MainController implements GraphView.SelectionObserver, TransitionMatrixView.GraphChangeObserver {
 
+    public StackPane mainStackPane;
     private GraphView graphView;
     private NodeView firstSelectionNode;
 
@@ -78,22 +78,29 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
     private final FileChooser.ExtensionFilter gmlExtFilter =
             new FileChooser.ExtensionFilter("Graph Modelling Language (*.gml)", "*.gml");
     private NodePaneController mNodePaneController;
+    private Grid gridBox;
+    private HugradeSettings settings;
 
     public void init(Application application)  {
-
         this.application = application;
-
         fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(graphExtFilter);
 
+        initSettings();
+        initGrid();
         redirectOutput();
         setupMenuItems();
         setupMouseInteractions();
+        setupMousePanning();
         setupKeyboardInteractions();
 
         updateScene();
         onGraphChanged(null);
         printStartingHints();
+    }
+
+    private void initSettings() {
+        this.settings = new HugradeSettings();
     }
 
     private void redirectOutput() {
@@ -115,7 +122,7 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
         miAStarSP.setOnAction(e->launchAStarSPSolver());
         miProsasMarch.setOnAction(event ->launchProsasWindow());
         miBellmanFordSP.setOnAction(event ->launchBellmanFordWindow());
-        miSettings.setOnAction(e-> launchGraphSettings());
+        miSettings.setOnAction(e-> launchSettings());
         miClearNullEdges.setOnAction(e-> actionClearNullEdges());
         miAbout.setOnAction(e-> launchAbout());
     }
@@ -226,7 +233,6 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
 
     private PathSolverController launchSolverWindow(String title, PathSolver solver) {
         if(graphView==null) return null;
-        Parent root;
         try {
             return tryLaunchPathSolverController(title, solver);
         }
@@ -261,14 +267,14 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
         return stage;
     }
 
-    private void launchGraphSettings() {
+    private void launchSettings() {
         if(graphView==null) return;
         Parent root;
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/graph_settings.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/settings.fxml"));
             root = loader.load();
-            GraphSettingsController ctrl = loader.getController();
-            ctrl.init(graphView.getGraph());
+            SettingsController ctrl = loader.getController();
+            ctrl.init(settings);
             Stage stage = launchNewStage("Settings", root);
             stage.setOnCloseRequest(event -> updateScene());
         }
@@ -381,7 +387,9 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
         //TODO: not working as expected
         scrollPane.setOnMouseClicked(this::mainMouseClickHandler);
 
-        //panning:
+    }
+
+    private void setupMousePanning() {
         graphContentPane.setOnMousePressed(event -> {
             if(event.getButton().equals(MouseButton.MIDDLE)) {
                 panPressedX = event.getX();
@@ -404,8 +412,8 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
         double my = mouseEvent.getY();
         Node n = checkHitAndSelect(mx, my);
 
-        if (mouseEvent.getButton()== MouseButton.PRIMARY)
-            handlePrimaryClickMouseAction(mouseEvent, mx, my, n);
+        if (n==null && mouseEvent.getButton()== MouseButton.PRIMARY)
+            handlePrimaryClickMouseAction(mouseEvent, mx, my);
 
          else if(mouseEvent.getButton()== MouseButton.SECONDARY) {
             handleSecondaryClickMouseAction(n);
@@ -418,8 +426,8 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
         return n;
     }
 
-    private void handlePrimaryClickMouseAction(javafx.scene.input.MouseEvent mouseEvent, double mx, double my, Node n) {
-        if (n == null && mouseEvent.getClickCount() == 2) {
+    private void handlePrimaryClickMouseAction(javafx.scene.input.MouseEvent mouseEvent, double mx, double my) {
+        if ( mouseEvent.getClickCount() == 2) {
             createNewNode(mx, my);
         }
     }
@@ -577,8 +585,26 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
     private void updateScene() {
         if(graphView!=null){
             graphContentPane.getChildren().clear();
+            showHideGrid();
             graphContentPane.getChildren().addAll(graphView.explode());
         }
+    }
+
+    private void showHideGrid() {
+        gridBox.enable(settings.isMagnetGridOn());
+    }
+
+    private void initGrid() {
+        double gridDimension = NodeView.DEF_RAD*4;
+        gridBox = new Grid(gridDimension, 1f);
+        NodeView.setGridDimension(gridDimension);
+        bindGridLayout();
+        mainStackPane.getChildren().add(0, gridBox);
+    }
+
+    private void bindGridLayout() {
+        graphContentPane.widthProperty().addListener((observable, oldValue, newValue) -> gridBox.updateWidth(newValue.doubleValue()));
+        graphContentPane.heightProperty().addListener((observable, oldValue, newValue) -> gridBox.updateHeight(newValue.doubleValue()));
     }
 
     @Override
@@ -593,6 +619,7 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
     @Override
     public void onGraphChanged(GraphView gv) {
         boolean validGraph = isValidGraph(gv);
+        settings.updateGraphView(gv);
         disableUIElements(validGraph);
         updateScene();
     }

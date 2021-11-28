@@ -164,9 +164,7 @@ public class GraphView {
     private EdgeView testHitEdges(double x, double y) {
         clearSelection();
         for(EdgeView e : edges){
-            if(e.intersects(x, y, 10,10)) {
-                return e;
-            }
+            if(e.contains(x, y)) return e;
         }
         return null;
     }
@@ -318,6 +316,14 @@ public class GraphView {
 
     public void setHelperDestinationPos(double x, double y) {
         helperDestination.setPos(x, y);
+    }
+
+    public void setMagnetGridEnabled(boolean enabled) {
+        NodeView.setMagnetGridEnabled(enabled);
+    }
+
+    public boolean isMagnetGridOn() {
+        return NodeView.isMagnetGridEnabled();
     }
 
     public interface SelectionObserver {

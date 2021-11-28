@@ -18,7 +18,7 @@ public class TestEdgeView {
         double poX = 1.875;
         double poY = 5.0;
 
-        boolean hit = ev.intersects(poX, poY, 1,1);
+        boolean hit = ev.contains(poX, poY);
 
         assertTrue(hit);
     }
@@ -32,7 +32,7 @@ public class TestEdgeView {
         double poX = 1.876;
         double poY = 7.0;
 
-        boolean hit = ev.intersects(poX, poY, 0,0);
+        boolean hit = ev.contains(poX, poY);
 
         assertFalse(hit);
     }

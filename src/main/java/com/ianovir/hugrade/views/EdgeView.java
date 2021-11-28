@@ -46,6 +46,8 @@ public class EdgeView extends CubicCurve {
         super();
         this.mEdge = e;
         this.graph = graph;
+        setPickOnBounds(false);
+
         setupUpdateListeners();
 
         setOrigin(origin);
@@ -296,54 +298,4 @@ public class EdgeView extends CubicCurve {
         return mEdge.toString();
     }
 
-    @Override
-    public boolean intersects(double localX, double localY, double localWidth, double localHeight) {
-        boolean intersectsBoundaries = super.intersects(localX, localY, localWidth, localHeight);
-        if(!intersectsBoundaries) return false;
-        return testIntersectsPath(localX, localY, Math.max(localWidth,localHeight), 0.01);
-    }
-
-    private boolean testIntersectsPath(double targetX, double targetY, double radius, double resolution) {
-        double x0 = getStartX();
-        double x1 = getControlX1();
-        double x2 = getControlX2();
-        double x3 = getEndX();
-        double y0 = getStartY();
-        double y1 = getControlY1();
-        double y2 = getControlY2();
-        double y3 = getEndY();
-
-        for(double t = 0.0;t<1.0; t+=resolution){
-            double pathX = getBezierInterpolation(x0, x1, x2, x3, t);
-            double pathY = getBezierInterpolation(y0, y1, y2, y3, t);
-            boolean targetClose = isTargetClose(targetX, targetY, radius, pathX, pathY);
-            if(targetClose) return true;
-        }
-
-        return false;
-
-    }
-
-    private boolean isTargetClose(double targetX, double targetY, double radius, double pathX, double pathY) {
-        double distance = getDistance(targetX, targetY, pathX, pathY);
-        return distance <= radius;
-    }
-
-    private double getDistance(double targetX, double targetY, double pathX, double pathY) {
-        double diffX_2 = Math.pow(targetX - pathX, 2);
-        double diffY_2 = Math.pow(targetY - pathY, 2);
-        return Math.sqrt(diffX_2 + diffY_2);
-    }
-
-    private double getBezierInterpolation(double h0, double h1, double h2, double h3, double t) {
-        return pow3(1 - t) * h0 + 3 * pow2(1 - t) * t * h1 + 3 * (1 - t) * pow2(t) * h2 + pow3(t) * h3;
-    }
-
-    private double pow3(double t) {
-        return  Math.pow(t, 3);
-    }
-
-    private double pow2(double t) {
-        return  Math.pow(t, 2);
-    }
 }

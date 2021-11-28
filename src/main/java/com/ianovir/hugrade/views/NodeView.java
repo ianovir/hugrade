@@ -31,6 +31,9 @@ public class NodeView extends Circle {
     private Color color ;
     private boolean isSelected;
 
+    private static double gridDimension = DEF_RAD;
+    private static boolean magnetGridEnabled;
+
     public NodeView(String name, double centerX, double centerY, float value){
         super( centerX, centerY, DEF_RAD);
         this.mNode = new GNode(name, centerX, centerY);
@@ -44,10 +47,13 @@ public class NodeView extends Circle {
         addShadow();
         bindInnedNodePosition();
         bindTextPosition();
-        configureMouseOps();
+        setupDragNDropOps();
+        setupCursorAppearance();
+
         refresh();
 
     }
+
 
     private Text setupValueText() {
         final Text valueText;
@@ -163,26 +169,19 @@ public class NodeView extends Circle {
         setCenterY(my);
     }
 
-    private void configureMouseOps() {
-        //Drag&Drop:
+    private void setupDragNDropOps() {
         final Point dragPoint = new Point();
         setOnMousePressed(mouseEvent -> {
-            // record a delta distance for the drag and drop operation.
-            dragPoint.x = getCenterX() - mouseEvent.getX();
-            dragPoint.y = getCenterY() - mouseEvent.getY();
+            storeDeltaDragNDrop(dragPoint, mouseEvent);
             getScene().setCursor(Cursor.MOVE);
         });
         setOnMouseReleased(mouseEvent -> getScene().setCursor(Cursor.HAND));
         setOnMouseDragged(mouseEvent -> {
-            double newX = mouseEvent.getX() + dragPoint.x;
-            if (newX > 0 && newX < getScene().getWidth()) {
-                setCenterX(newX);
-            }
-            double newY = mouseEvent.getY() + dragPoint.y;
-            if (newY > 0 && newY < getScene().getHeight()) {
-                setCenterY(newY);
-            }
+            updateNodeCoordinates(dragPoint, mouseEvent);
         });
+    }
+
+    private void setupCursorAppearance() {
         setOnMouseEntered(mouseEvent -> {
             if (!mouseEvent.isPrimaryButtonDown()) {
                 getScene().setCursor(Cursor.HAND);
@@ -195,12 +194,47 @@ public class NodeView extends Circle {
         });
     }
 
-    public boolean isSelected() {
-        return isSelected;
+    private void updateNodeCoordinates(Point dragPoint, javafx.scene.input.MouseEvent mouseEvent) {
+        double newX = mouseEvent.getX() + dragPoint.x;
+        double newY = mouseEvent.getY() + dragPoint.y;
+        setNodeX(newX);
+        setNodeY(newY);
     }
 
-    public void setSelected(boolean selected) {
-        isSelected = selected;
+    private void setNodeX(double newX) {
+        double xpos = getMagnetGridPos(newX);
+        if (isValidXPos(xpos)) {
+            setCenterX(xpos);
+        }
+    }
+
+    private void setNodeY(double newY) {
+        double ypos = getMagnetGridPos(newY);
+        if (isValidYPos(ypos)) {
+            setCenterY(ypos);
+        }
+    }
+
+    private double getMagnetGridPos(double coo) {
+        if(magnetGridEnabled)  return coo - (coo%gridDimension);
+        return coo;
+    }
+
+    private boolean isValidXPos(double newX) {
+        return newX > 0 && newX < getScene().getWidth();
+    }
+
+    private boolean isValidYPos(double newY) {
+        return newY > 0 && newY < getScene().getHeight();
+    }
+
+    private void storeDeltaDragNDrop(Point dragPoint, javafx.scene.input.MouseEvent mouseEvent) {
+        dragPoint.x = getCenterX() - mouseEvent.getX();
+        dragPoint.y = getCenterY() - mouseEvent.getY();
+    }
+
+    public boolean isSelected() {
+        return isSelected;
     }
 
     public Color getColor() {
@@ -235,5 +269,18 @@ public class NodeView extends Circle {
     }
 
     private static class Point { double x, y; }
+
+    public static void setGridDimension(double gridDimension) {
+        NodeView.gridDimension = gridDimension;
+    }
+
+    public static void setMagnetGridEnabled(boolean enabled) {
+       magnetGridEnabled = enabled;
+    }
+
+    public static boolean isMagnetGridEnabled() {
+        return magnetGridEnabled;
+    }
+
 
 }

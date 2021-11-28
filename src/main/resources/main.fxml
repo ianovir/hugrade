@@ -52,7 +52,9 @@
        <center>
            <AnchorPane minHeight="0.0" minWidth="0.0">
                <ScrollPane fx:id="scrollPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                   <Pane fx:id="graphContentPane" />
+                   <StackPane fx:id="mainStackPane">
+                       <Pane fx:id="graphContentPane" />
+                   </StackPane>
                </ScrollPane>
            </AnchorPane>
             </center>
