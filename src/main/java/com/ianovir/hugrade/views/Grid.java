@@ -9,24 +9,17 @@ public class Grid extends Pane {
 
     private final double spacing;
     private final float lineWidth;
-    private double currentHeight, currentWidth;
     private boolean enabledDraw;
 
     public Grid(double spacing, float lineWidth){
         this.spacing = spacing;
         this.lineWidth = lineWidth;
+        bindGridLayout();
     }
 
-    public void updateWidth(double width) {
-        Canvas c = drawCanvas(width, currentHeight);
-        this.currentWidth = width;
-        refreshCanvas(c);
-    }
-
-    public void updateHeight(double height) {
-        Canvas c = drawCanvas(currentWidth, height);
-        this.currentHeight = height;
-        refreshCanvas(c);
+    private void bindGridLayout() {
+        widthProperty().addListener((observable, oldValue, newValue) -> forceRefresh());
+        heightProperty().addListener((observable, oldValue, newValue) -> forceRefresh());
     }
 
     private void refreshCanvas(Canvas c) {
@@ -68,10 +61,9 @@ public class Grid extends Pane {
 
     public void enable(boolean enabled) {
         this.enabledDraw = enabled;
-        onDrawUpdated();
     }
 
-    private void onDrawUpdated() {
+    public void refresh() {
         if(enabledDraw){
             forceRefresh();
         }else{
@@ -79,11 +71,12 @@ public class Grid extends Pane {
         }
     }
 
-    private void clear() {
-        this.getChildren().clear();
+    private void forceRefresh() {
+        Canvas c = drawCanvas(getWidth(), getHeight());
+        refreshCanvas(c);
     }
 
-    private void forceRefresh() {
-        drawCanvas(currentWidth, currentHeight);
+    private void clear() {
+        this.getChildren().clear();
     }
 }

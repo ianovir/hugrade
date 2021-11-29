@@ -21,7 +21,7 @@ public class EdgeView extends CubicCurve {
 
     private static final double PI_4 = Math.PI/4;
     private static final double STROKE_W = 2;
-    private static final double SELF_FACT = 4;
+    private static final double SELF_FACT = Math.PI;
     private final Graph graph;
     private NodeView origin;
     private NodeView destination;
@@ -47,12 +47,9 @@ public class EdgeView extends CubicCurve {
         this.mEdge = e;
         this.graph = graph;
         setPickOnBounds(false);
-
-        setupUpdateListeners();
-
+        initExtremesUpdateListeners();
         setOrigin(origin);
         setDestination(destination);
-
         setStroke(getColor());
         setStrokeLineCap(StrokeLineCap.ROUND);
         setStrokeWidth(STROKE_W);
@@ -64,47 +61,93 @@ public class EdgeView extends CubicCurve {
         refresh();
     }
 
-    private void setupUpdateListeners() {
-        controlXUpdater = observable -> {
-            double alpha = getAngle(origin, destination);
-            double[] dirs = getControlDirByAngle(alpha);
-            double dx = dirs[0];
-            if(!origin.equals(destination)){
-                double fact = Math.abs(origin.getCenterX()- destination.getCenterX())/3;
-                setControlX1(origin.getCenterX() + dx * fact);
-                setControlX2(destination.getCenterX() - dx * fact);
-                setEndX(destination.getCenterX() - dx * destination.getRadius());
-            }else{
-                setControlX1(origin.getCenterX());
-                setControlX2(origin.getCenterX() + SELF_FACT * origin.getRadius());
-                setEndX(origin.getCenterX() +  origin.getRadius());
-            }
-            double delt = Math.signum(destination.getCenterY()-origin.getCenterY())*origin.getRadius()/2;
-            double x1 = (getEndX() + getStartX() + getControlX1() + getControlX2())/4;
-            weightLabel.setX(x1 +delt);
-        };
+    private void initExtremesUpdateListeners() {
+        controlXUpdater = observable -> onExtremeChangedX();
+        controlYUpdater = observable -> onExtremeChangedY();
+    }
 
-        controlYUpdater = observable -> {
-            double alpha = getAngle(origin, destination);
-            double[] dirs = getControlDirByAngle(alpha);
-            double dy = dirs[1];
-            if(!origin.equals(destination)){
-                double fact = Math.abs(origin.getCenterY()- destination.getCenterY())/3;
-                setControlY1(origin.getCenterY() - dy * fact);
-                setControlY2(destination.getCenterY() + dy * fact);
-                setEndY(destination.getCenterY() + dy * destination.getRadius());
-            }else{
-                setControlY1(origin.getCenterY() - SELF_FACT * origin.getRadius());
-                setControlY2(origin.getCenterY());
-                setEndY(origin.getCenterY());
-            }
-            double delt = Math.signum(destination.getCenterY()-origin.getCenterY())*origin.getRadius()/2;
-            double y1 = (getEndY() + getStartY() + getControlY1() + getControlY2())/4;
-            weightLabel.setY(y1+ delt);
-        };
+    private void onExtremeChangedY() {
+        double alpha = getAngle(origin, destination);
+        double[] dirs = getControlDirByAngle(alpha);
+        double dy = dirs[1];
+        if(!origin.equals(destination)){
+            updateControlsYStraight(dy);
+        }else{
+            updateControlsYCircular();
+        }
+        updateLabelY();
+    }
+
+    private void updateControlsYStraight(double dy) {
+        double fact = Math.abs(origin.getCenterY()- destination.getCenterY())/3;
+        setControlY1(origin.getCenterY() - dy * fact);
+        setControlY2(destination.getCenterY() + dy * fact);
+        setEndY(destination.getCenterY() + dy * destination.getRadius());
+    }
+
+    private void updateControlsYCircular() {
+        setControlY1(origin.getCenterY() - SELF_FACT * origin.getRadius());
+        setControlY2(origin.getCenterY());
+        setEndY(origin.getCenterY());
+    }
+
+    private void updateLabelY() {
+        double delt = Math.signum(destination.getCenterY()-origin.getCenterY())*origin.getRadius()/2;
+        double y1 = (getEndY() + getStartY() + getControlY1() + getControlY2())/4;
+        weightLabel.setY(y1+ delt);
+    }
+
+    private void onExtremeChangedX() {
+        double alpha = getAngle(origin, destination);
+        double[] dirs = getControlDirByAngle(alpha);
+        double dx = dirs[0];
+        if(!origin.equals(destination)){
+            updateControlsXStraight(dx);
+        }else{
+            updateControlsXCircular();
+        }
+        updateLabelX();
+    }
+
+    private void updateControlsXStraight(double dx) {
+        double fact = Math.abs(origin.getCenterX()- destination.getCenterX())/3;
+        setControlX1(origin.getCenterX() + dx * fact);
+        setControlX2(destination.getCenterX() - dx * fact);
+        setEndX(destination.getCenterX() - dx * destination.getRadius());
+    }
+
+    private void updateControlsXCircular() {
+        setControlX1(origin.getCenterX());
+        setControlX2(origin.getCenterX() + SELF_FACT * origin.getRadius());
+        setEndX(origin.getCenterX() +  origin.getRadius());
+    }
+
+    private void updateLabelX() {
+        double delt = Math.signum(destination.getCenterY()-origin.getCenterY())*origin.getRadius()/2;
+        double x1 = (getEndX() + getStartX() + getControlX1() + getControlX2())/4;
+        weightLabel.setX(x1 +delt);
     }
 
     private void setupArrowEnd() {
+        createArrowTriangle();
+        setupArrowTriangleTransform();
+        arrowEnd = new Group(triangle);
+    }
+
+    private void setupArrowTriangleTransform() {
+        Rotate triangleRotation = new Rotate();
+        triangle.getTransforms().add(triangleRotation);
+
+        InvalidationListener terminalUpdater = o -> refreshArrowTriangleTransform(triangleRotation);
+        startXProperty().addListener(terminalUpdater);
+        startYProperty().addListener(terminalUpdater);
+        endXProperty().addListener(terminalUpdater);
+        endYProperty().addListener(terminalUpdater);
+
+        terminalUpdater.invalidated(null);
+    }
+
+    private void createArrowTriangle() {
         arrowEnd=new Group();
         triangle = new Polygon();
         triangle.getPoints().addAll(0.0, 0.0,
@@ -112,25 +155,9 @@ public class EdgeView extends CubicCurve {
                 -10.0, 5.0);
         triangle.setStroke(getColor());
         triangle.setFill(getColor());
-        Rotate triangleRotation = new Rotate();
-        triangle.getTransforms().add(triangleRotation);
-
-        InvalidationListener terminalUpdater = o -> {
-            refreshArrowTriangle(triangleRotation);
-        };
-
-        // add terminalUpdater to properties
-        startXProperty().addListener(terminalUpdater);
-        startYProperty().addListener(terminalUpdater);
-        endXProperty().addListener(terminalUpdater);
-        endYProperty().addListener(terminalUpdater);
-
-        terminalUpdater.invalidated(null);
-
-        arrowEnd = new Group(triangle);
     }
 
-    private void refreshArrowTriangle(Rotate triangleRotation) {
+    private void refreshArrowTriangleTransform(Rotate triangleRotation) {
         double sx = getControlX2();
         double sy = getControlY2();
         double ex = getEndX();
@@ -140,11 +167,15 @@ public class EdgeView extends CubicCurve {
         triangle.setTranslateY(ey);
         double a = getAngle(sx, sy, ex, ey);
         double[] dir = getControlDirByAngle(a);
-        triangleRotation.setAngle(getAngleFromDirection(a, dir));
+        triangleRotation.setAngle(getDegAngleFromDirection(a, dir));
     }
 
-    private double getAngleFromDirection(double a, double[] dir) {
-        return dir[1] == 0 ? a * 180d / Math.PI : -a * 180d / Math.PI;
+    private double getDegAngleFromDirection(double rad, double[] dir) {
+        return dir[1] == 0 ? grad2Deg(rad) : grad2Deg(-rad);
+    }
+
+    private double grad2Deg(double a) {
+        return a * 180d / Math.PI;
     }
 
     public NodeView getOrigin() {
@@ -156,11 +187,7 @@ public class EdgeView extends CubicCurve {
     }
 
     public void setOrigin(NodeView origin) {
-        if(this.origin!=null){
-            this.origin.centerXProperty().removeListener(controlXUpdater);
-            this.origin.centerYProperty().removeListener(controlYUpdater);
-            this.startXProperty().unbind();
-        }
+        unbindPreviousOrigin();
 
         this.origin = origin;
         mEdge.setSource(graph.getNodeId(origin.getGNode()));
@@ -174,16 +201,28 @@ public class EdgeView extends CubicCurve {
     }
 
     public void setDestination(NodeView destination) {
-        if(this.destination!=null){
-            this.destination.centerXProperty().removeListener(controlXUpdater);
-            this.destination.centerYProperty().removeListener(controlYUpdater);
-        }
+        unbindPreviousDestination();
 
         this.destination = destination;
         mEdge.setDestination(graph.getNodeId(destination.getGNode()));
 
         destination.centerXProperty().addListener(controlXUpdater);
         destination.centerYProperty().addListener(controlYUpdater);
+    }
+
+    private void unbindPreviousOrigin() {
+        if(this.origin!=null){
+            this.origin.centerXProperty().removeListener(controlXUpdater);
+            this.origin.centerYProperty().removeListener(controlYUpdater);
+            this.startXProperty().unbind();
+        }
+    }
+
+    private void unbindPreviousDestination() {
+        if(this.destination!=null){
+            this.destination.centerXProperty().removeListener(controlXUpdater);
+            this.destination.centerYProperty().removeListener(controlYUpdater);
+        }
     }
 
     public void setIsSelected(boolean b) {
@@ -231,12 +270,7 @@ public class EdgeView extends CubicCurve {
         getStrokeDashArray().clear();
     }
 
-    /**
-     * Retrieves the angle of a line defined by two nodes
-     * @param origin the origin node
-     * @param destination the destination node
-     * @return angle in radians
-     */
+
     private double getAngle(NodeView origin, NodeView destination) {
         return getAngle(origin.getCenterX(), origin.getCenterY(),
                 destination.getCenterX(), destination.getCenterY());
@@ -273,7 +307,7 @@ public class EdgeView extends CubicCurve {
     }
 
     private boolean isPointingWest(double angle) {
-        return (angle >= 3 * PI_4 && angle < Math.PI) || (angle >= -Math.PI && angle < -3 * PI_4);
+        return (angle >= 3 * PI_4 && angle <= Math.PI) || (angle >= -Math.PI && angle < -3 * PI_4);
     }
 
     private boolean isPointingEast(double angle) {
@@ -297,5 +331,13 @@ public class EdgeView extends CubicCurve {
     public String toString(){
         return mEdge.toString();
     }
+
+    @Override
+    public boolean contains(double localX, double localY) {
+        boolean weightContains = weightLabel.contains(localX, localY);
+        boolean superContains =  super.contains(localX, localY);
+        return weightContains || superContains;
+    }
+
 
 }

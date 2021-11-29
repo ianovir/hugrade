@@ -10,11 +10,18 @@ import com.ianovir.hugrade.managers.HugradeSettings;
 import com.ianovir.hugrade.views.*;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.value.ObservableValue;
+import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -69,15 +76,13 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
     private File currentFile;
     private FileChooser fileChooser;
 
-    private double panPressedX;
-    private double panPressedY;
-
     private final FileChooser.ExtensionFilter graphExtFilter =
             new FileChooser.ExtensionFilter("Hugrade Graph project (*.xgp)", "*.xgp");
 
     private final FileChooser.ExtensionFilter gmlExtFilter =
             new FileChooser.ExtensionFilter("Graph Modelling Language (*.gml)", "*.gml");
     private NodePaneController mNodePaneController;
+    @FXML
     private Grid gridBox;
     private HugradeSettings settings;
 
@@ -87,6 +92,7 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
         fileChooser.getExtensionFilters().add(graphExtFilter);
 
         initSettings();
+        setupScrollPaneSizeListeners();
         initGrid();
         redirectOutput();
         setupMenuItems();
@@ -96,6 +102,11 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
         updateScene();
         onGraphChanged(null);
         printStartingHints();
+    }
+
+    private void setupScrollPaneSizeListeners() {
+        scrollPane.widthProperty().addListener(this::onUpdateScrollPaneWidth);
+        scrollPane.heightProperty().addListener(this::onUpdateScrollPaneHeight);
     }
 
     private void initSettings() {
@@ -383,21 +394,19 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
     }
 
     private void setupMouseInteractions() {
-        scrollPane.setPannable(true);
-        //TODO: not working as expected
-        scrollPane.setOnMouseClicked(this::mainMouseClickHandler);
-
+        //scrollPane.setPannable(true);
+        graphContentPane.setOnMouseClicked(this::mainMouseClickHandler);
     }
+
 
     private void mainMouseClickHandler(javafx.scene.input.MouseEvent mouseEvent) {
         if(graphView==null) return;
-        double mx = mouseEvent.getX() ;
+        double mx = mouseEvent.getX();
         double my = mouseEvent.getY();
         Node n = checkHitAndSelect(mx, my);
 
         if (n==null && mouseEvent.getButton()== MouseButton.PRIMARY)
             handlePrimaryClickMouseAction(mouseEvent, mx, my);
-
          else if(mouseEvent.getButton()== MouseButton.SECONDARY) {
             handleSecondaryClickMouseAction(n);
         }
@@ -424,9 +433,9 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
     }
 
     private void createNewNode(double mx, double my) {
-        NodeView nnode = new NodeView("Node", mx, my);
-        nnode.setColor(NodePaneController.getLastColor());
-        graphView.addNodes(nnode);
+        NodeView nodeView = new NodeView("Node", mx, my);
+        nodeView.setColor(NodePaneController.getLastColor());
+        graphView.addNodes(nodeView);
         updateScene();
     }
 
@@ -471,9 +480,7 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
 
     private void enableOnMouseUpdate(boolean b) {
         if(b){
-            graphContentPane.setOnMouseMoved(mouseEvent -> {
-                graphView.setHelperDestinationPos(mouseEvent.getX(), mouseEvent.getY());
-            });
+            graphContentPane.setOnMouseMoved(mouseEvent -> graphView.setHelperDestinationPos(mouseEvent.getX(), mouseEvent.getY()));
         }else{
             mainPane.setOnMouseMoved(null);
         }
@@ -568,27 +575,24 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
     private void updateScene() {
         if(graphView!=null){
             graphContentPane.getChildren().clear();
-            showHideGrid();
             graphContentPane.getChildren().addAll(graphView.explode());
+            updateGrid();
         }
     }
 
-    private void showHideGrid() {
-        gridBox.enable(settings.isMagnetGridOn());
+    private void updateGrid() {
+        gridBox.enable(graphView.isMagnetGridOn());
+        gridBox.refresh();
+
     }
 
     private void initGrid() {
         double gridDimension = NodeView.DEF_RAD*4;
         gridBox = new Grid(gridDimension, 1f);
         NodeView.setGridDimension(gridDimension);
-        bindGridLayout();
         mainStackPane.getChildren().add(0, gridBox);
     }
 
-    private void bindGridLayout() {
-        graphContentPane.widthProperty().addListener((observable, oldValue, newValue) -> gridBox.updateWidth(newValue.doubleValue()));
-        graphContentPane.heightProperty().addListener((observable, oldValue, newValue) -> gridBox.updateHeight(newValue.doubleValue()));
-    }
 
     @Override
     public void onSelectedItem(Node selectedNode) {
@@ -639,7 +643,22 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
     }
 
     private void printHints() {
-        System.out.println("Double click to create a Node");
+        System.out.println("Double click to createf a Node");
         System.out.println("Right click to create an Edge between two Nodes");
+    }
+
+
+    private void onUpdateScrollPaneWidth(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+        if (newValue.doubleValue() > graphContentPane.getWidth()) {
+            graphContentPane.setMinWidth(newValue.doubleValue());
+            gridBox.setMinWidth(newValue.doubleValue());
+        }
+    }
+
+    private void onUpdateScrollPaneHeight(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+        if (newValue.doubleValue() > graphContentPane.getHeight()) {
+            graphContentPane.setMinHeight(newValue.doubleValue());
+            gridBox.setMinHeight(newValue.doubleValue());
+        }
     }
 }

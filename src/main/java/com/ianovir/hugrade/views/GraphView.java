@@ -147,7 +147,8 @@ public class GraphView {
 
     public Node hitSomething(double x, double y) {
         Node n = testHitNodes(x, y);
-        if(n==null) n= testHitEdges(x, y);
+        if(n==null)
+            n= testHitEdges(x, y);
         return n;
     }
 
@@ -333,5 +334,7 @@ public class GraphView {
     public EdgeView getHelpEdge(){
         return helperEdge;
     }
+
+
 
 }
