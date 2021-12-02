@@ -6,7 +6,7 @@
 <?import javafx.scene.text.*?>
 
 <AnchorPane fx:id="mainPane" minWidth="0.0" prefHeight="419.0" prefWidth="221.0" xmlns="http://javafx.com/javafx/11.0.1"
-            xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ianovir.hugrade.controllers.NodePaneController">
+            xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ianovir.hugrade.presentation.controllers.NodePaneController">
             <FlowPane orientation="VERTICAL" prefHeight="464.0" prefWidth="440.0">
                 <Label text="Node">
                     <FlowPane.margin>

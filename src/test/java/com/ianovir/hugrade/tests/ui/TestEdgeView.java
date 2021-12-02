@@ -1,8 +1,8 @@
 package com.ianovir.hugrade.tests.ui;
 
 import com.ianovir.hugrade.core.models.Graph;
-import com.ianovir.hugrade.views.EdgeView;
-import com.ianovir.hugrade.views.NodeView;
+import com.ianovir.hugrade.presentation.views.EdgeView;
+import com.ianovir.hugrade.presentation.views.NodeView;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

@@ -3,9 +3,9 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<?import com.ianovir.hugrade.views.TransitionMatrixView?>
+<?import com.ianovir.hugrade.presentation.views.TransitionMatrixView?>
 <AnchorPane prefHeight="400.0" prefWidth="400" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.ianovir.hugrade.controllers.TransitionMatrixController"
+            fx:controller="com.ianovir.hugrade.presentation.controllers.TransitionMatrixController"
             fx:id="mainPane">
    <children>
       <GridPane layoutX="109.0" layoutY="98.0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">

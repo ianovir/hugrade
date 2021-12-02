@@ -6,17 +6,11 @@ package com.ianovir.hugrade.core.models;
 public class GNode {
 
     private String name;
-
     private String description;
-
     private double x;
-
     private double y;
-
     double[] color;
-
     float value;
-
     public GNode(){}
 
     public GNode(String name, double posX, double posY) {

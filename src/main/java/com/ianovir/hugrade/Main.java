@@ -1,6 +1,6 @@
 package com.ianovir.hugrade;
 
-import com.ianovir.hugrade.controllers.MainController;
+import com.ianovir.hugrade.presentation.controllers.MainController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.*;
