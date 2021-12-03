@@ -1,5 +1,6 @@
 package com.ianovir.hugrade.presentation.controllers;
 
+import com.ianovir.hugrade.core.business.GraphChangeObserver;
 import com.ianovir.hugrade.core.business.converters.Graph2NodesMatrixConverter;
 import com.ianovir.hugrade.core.models.GNode;
 import com.ianovir.hugrade.presentation.views.GraphView;
@@ -25,7 +26,7 @@ public class NodesMatrixController {
 
     private ObservableList<String[]> data;
     private GraphView graphView;
-    private ArrayList<TransitionMatrixView.GraphChangeObserver> graphChangeObservers;
+    private ArrayList<GraphChangeObserver> graphChangeObservers;
 
     public void setGraphView(GraphView gv){
         this.graphView = gv;
@@ -84,7 +85,7 @@ public class NodesMatrixController {
 
     private void onUpdate() {
         updateData();
-        for(TransitionMatrixView.GraphChangeObserver obs : graphChangeObservers) obs.onGraphChanged(graphView);
+        for(GraphChangeObserver obs : graphChangeObservers) obs.onGraphChanged(graphView);
     }
 
     private void updateData() {
@@ -92,12 +93,12 @@ public class NodesMatrixController {
         String[][] res = Graph2NodesMatrixConverter.convert(graphView.getGraph());
         Collections.addAll(data, res);
     }
-    public void addChangeObserver(TransitionMatrixView.GraphChangeObserver obs){
+    public void addChangeObserver(GraphChangeObserver obs){
         if(!graphChangeObservers.contains(obs))
             graphChangeObservers.add(obs);
     }
 
-    public void removeChangeObserver(TransitionMatrixView.GraphChangeObserver obs){
+    public void removeChangeObserver(GraphChangeObserver obs){
         graphChangeObservers.remove(obs);
     }
 

@@ -1,5 +1,6 @@
 package com.ianovir.hugrade.presentation.views;
 
+import com.ianovir.hugrade.core.business.GraphChangeObserver;
 import com.ianovir.hugrade.core.business.converters.Graph2TransMatrixConverter;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -150,9 +151,7 @@ public class TransitionMatrixView extends AnchorPane {
         graphChangeObservers.remove(obs);
     }
 
-    public interface GraphChangeObserver {
-        void onGraphChanged(GraphView gv);
-    }
+
 
 
 }

@@ -1,12 +1,14 @@
 package com.ianovir.hugrade.presentation.controllers;
 
+import com.ianovir.hugrade.core.business.GraphChangeObserver;
 import com.ianovir.hugrade.core.business.converters.Graph2GMLConverter;
 import com.ianovir.hugrade.core.business.solvers.path.AStarSolver;
 import com.ianovir.hugrade.core.business.solvers.path.BellmanFordSolver;
 import com.ianovir.hugrade.core.business.solvers.path.DijkstraSolver;
 import com.ianovir.hugrade.core.business.solvers.path.PathSolver;
 import com.ianovir.hugrade.core.models.Graph;
-import com.ianovir.hugrade.presentation.HugradeSettings;
+import com.ianovir.hugrade.presentation.utils.HugradeSettings;
+import com.ianovir.hugrade.presentation.utils.WindowsLauncher;
 import com.ianovir.hugrade.presentation.views.*;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -41,9 +43,10 @@ import java.util.Optional;
 import static com.ianovir.hugrade.data.FileManager.openGraphFile;
 import static com.ianovir.hugrade.data.FileManager.saveGraphFile;
 
-public class MainController implements GraphView.SelectionObserver, TransitionMatrixView.GraphChangeObserver {
+public class MainController implements GraphView.SelectionObserver, GraphChangeObserver {
 
     public StackPane mainStackPane;
+    public Pane toolBar;
     private GraphView graphView;
     private NodeView firstSelectionNode;
 
@@ -55,7 +58,7 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
     public MenuItem miExportGml;
     public MenuItem miBellmanFordSP;
     public MenuItem miProsasMarch;
-    public MenuItem miClearNullEdges;
+    public MenuItem miRemoveZeroEdges;
     public MenuItem miFileNew;
     public MenuItem miFileOpen;
     public MenuItem miFileSave;
@@ -98,10 +101,24 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
         setupMenuItems();
         setupMouseInteractions();
         setupKeyboardInteractions();
+        initToolbar();
 
         updateScene();
         onGraphChanged(null);
         printStartingHints();
+    }
+
+    private void initToolbar() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/toolBar.fxml"));
+            Parent root = loader.load();
+            toolBar.getChildren().setAll(root);
+            ToolBarController controller = loader.getController();
+            controller.init(settings, this);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
     private void setupScrollPaneSizeListeners() {
@@ -126,15 +143,15 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
         miFileSaveAs.setOnAction(e -> actionFileSaveAs());
         miExportGml.setOnAction(e -> actionExportGml());
         miQuit.setOnAction(e ->close(new WindowEvent(taConsole.getScene().getWindow(), e.getEventType())));
-        miTransMatrix.setOnAction(e->launchTransMxWindow());
-        miNodesTable.setOnAction(e->launchNodesWindow());
-        miDijkstraSP.setOnAction(e->launchDijkstraSPSolver());
-        miAStarSP.setOnAction(e->launchAStarSPSolver());
-        miProsasMarch.setOnAction(event ->launchProsasWindow());
-        miBellmanFordSP.setOnAction(event ->launchBellmanFordWindow());
-        miSettings.setOnAction(e-> launchSettings());
-        miClearNullEdges.setOnAction(e-> actionClearNullEdges());
-        miAbout.setOnAction(e-> launchAbout());
+        miTransMatrix.setOnAction(e-> WindowsLauncher.launchTransMxWindow(this, graphView, this));
+        miNodesTable.setOnAction(e->WindowsLauncher.launchNodesWindow(this, graphView,this));
+        miDijkstraSP.setOnAction(e->WindowsLauncher.launchDijkstraSPSolver(this, graphView));
+        miAStarSP.setOnAction(e->WindowsLauncher.launchAStarSPSolver(this, graphView));
+        miProsasMarch.setOnAction(event ->WindowsLauncher.launchProsasWindow(this, graphView));
+        miBellmanFordSP.setOnAction(event ->WindowsLauncher.launchBellmanFordWindow(this, graphView));
+        miSettings.setOnAction(e-> WindowsLauncher.launchSettings(this, settings, this));
+        miRemoveZeroEdges.setOnAction(e-> actionRemoveZeroEdges());
+        miAbout.setOnAction(e-> WindowsLauncher.launchAbout(this, application));
     }
 
     private void actionNewFile() {
@@ -165,7 +182,7 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
         return b.getButtonData() == ButtonBar.ButtonData.YES;
     }
 
-    private void actionClearNullEdges() {
+    private void actionRemoveZeroEdges() {
         if(graphView!=null){
             graphView.clearZeroEdges();
             updateScene();
@@ -220,144 +237,6 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
         }
     }
 
-    private void launchDijkstraSPSolver() {
-        launchSolverWindow("Dijkstra path solver",
-                new DijkstraSolver(graphView.getGraph()));
-    }
-
-    private void launchAStarSPSolver() {
-        launchSolverWindow("A* solver",
-                new AStarSolver(graphView.getGraph()));
-    }
-
-    private void launchBellmanFordWindow() {
-       var ctrl = launchSolverWindow("Bellman-Ford solver",
-               new BellmanFordSolver(graphView.getGraph()));
-       if(ctrl!=null){
-           ctrl.selectNegativeEdgesItem(PathSolver.NegativeEdgesOp.AS_IS);
-           ctrl.setNegativeEdgesDisabled(true);
-       }
-    }
-
-    private PathSolverController launchSolverWindow(String title, PathSolver solver) {
-        if(graphView==null) return null;
-        try {
-            return tryLaunchPathSolverController(title, solver);
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    private PathSolverController tryLaunchPathSolverController(String title, PathSolver solver) throws IOException {
-        Parent root;
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/path_solver.fxml"));
-        root = loader.load();
-        PathSolverController ctrl = loader.getController();
-        ctrl.init(graphView, solver);
-        launchNewStage(title, root);
-        return ctrl;
-    }
-
-    private Stage launchNewStage(String title, Parent root) {
-        return launchNewStage(title, new Scene(root));
-    }
-
-    private Stage launchNewStage(String title, Scene scene) {
-        Stage stage = new Stage();
-        stage.getIcons().add(new Image(getClass().getResourceAsStream("/icon.png")));
-        stage.initModality(Modality.APPLICATION_MODAL);
-        stage.setTitle(title);
-        stage.setScene(scene);
-        stage.setResizable(false);
-        stage.show();
-        return stage;
-    }
-
-    private void launchSettings() {
-        if(graphView==null) return;
-        Parent root;
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/settings.fxml"));
-            root = loader.load();
-            SettingsController ctrl = loader.getController();
-            ctrl.init(settings);
-            Stage stage = launchNewStage("Settings", root);
-            stage.setOnCloseRequest(event -> updateScene());
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void launchAbout() {
-        Parent root;
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/about.fxml"));
-            root = loader.load();
-            AboutController ctrl = loader.getController();
-            ctrl.init(application);
-            launchNewStage("About", root);
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void launchTransMxWindow() {
-        if(graphView==null) return;
-        Parent root;
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/transition_matrix.fxml"));
-            root = loader.load();
-            TransitionMatrixController ctrl = loader.getController();
-            ctrl.setGraphView(graphView);
-            ctrl.getTransMatrix().addChangeObserver(this);
-            launchNewStage("Transition matrix", new Scene(root, 450, 450) );
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void launchNodesWindow() {
-        if(graphView==null) return;
-        Parent root;
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/nodes_matrix.fxml"));
-            root = loader.load();
-            NodesMatrixController ctrl = loader.getController();
-            ctrl.setGraphView(graphView);
-            ctrl.addChangeObserver(this);
-            launchNewStage("Nodes matrix", root);
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void launchProsasWindow() {
-        if(graphView==null || graphView.getGraph()==null) return;
-        if(graphView.getGraph().getNodeById(0)==null){
-            Alert errAlert = new Alert(Alert.AlertType.ERROR);
-            errAlert.setHeaderText("No zero node");
-            errAlert.setContentText("The PROSAS solver needs one zero indexed node.\nAborting.");
-            errAlert.showAndWait();
-            return;
-        }
-        Parent root;
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/prosas_solver.fxml"));
-            root = loader.load();
-            ProsasSolverController ctrl = loader.getController();
-            ctrl.setGraphView(graphView);
-            launchNewStage("Prosas solver", root);
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     private void setupKeyboardInteractions() {
         graphContentPane.setOnKeyPressed(e -> {
@@ -619,6 +498,7 @@ public class MainController implements GraphView.SelectionObserver, TransitionMa
         miQuit.setDisable(false);
         miFileNew.setDisable(false);
         miAbout.setDisable(false);
+        toolBar.setDisable(false);
     }
 
     private boolean isValidGraph(GraphView gv) {

@@ -1,6 +1,6 @@
 package com.ianovir.hugrade.presentation.controllers;
 
-import com.ianovir.hugrade.presentation.HugradeSettings;
+import com.ianovir.hugrade.presentation.utils.HugradeSettings;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
 

@@ -1,4 +1,4 @@
-package com.ianovir.hugrade.presentation;
+package com.ianovir.hugrade.presentation.utils;
 
 import com.ianovir.hugrade.core.models.Graph;
 import com.ianovir.hugrade.presentation.views.GraphView;
@@ -23,6 +23,10 @@ public class HugradeSettings {
 
     private Graph getGraph() {
         return graphView.getGraph();
+    }
+
+    public GraphView getGraphView() {
+        return graphView;
     }
 
     public String getNodeMu() {
@@ -65,4 +69,10 @@ public class HugradeSettings {
         return false;
     }
 
+    public boolean areNodeValuesVisible() {
+        if(graphValid()){
+            return getGraph().areNodeValuesVisible();
+        }
+        return false;
+    }
 }

@@ -170,15 +170,19 @@ public class Graph {
         this.edgeMu = edgeMu;
     }
 
-    public boolean isNodeValuesVisible() {
-        return nodeValuesVisible;
-    }
-
     public boolean edgeExists(int source, int destination) {
         return getEdgesByNodeIDs(source, destination)!=null;
     }
 
     public int getNodeId(GNode node) {
         return nodes.indexOf(node);
+    }
+
+    public boolean isNodeValuesVisible() {
+        return nodeValuesVisible;
+    }
+
+    public boolean areNodeValuesVisible() {
+        return nodeValuesVisible;
     }
 }
