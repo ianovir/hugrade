@@ -11,6 +11,6 @@ public class AboutController {
 
     public void init( Application app){
         lblMainLink.setOnAction(t -> app.getHostServices().showDocument("https://ianovir.com/hugrade/"));
-        lblVersion.setText("v." + Main.UGLY_VERSION);
+        lblVersion.setText("v." + Main.getVersion());
     }
 }
