@@ -86,5 +86,24 @@ public class TestCoreGraph {
         assertEquals(0, g.getEdges().get(0).getDestination());
     }
 
+    @Test
+    public void testNormalizeNodeEdges(){
+        Graph g = new Graph();
+        GNode a = new GNode("A", 0, 0);
+        g.addNodes(a);
+        g.addNodes(new GNode("B", 0, 0));
+        g.addNodes(new GNode("C", 0, 0));
+        g.addNodes(new GNode("D", 0, 0));
+        g.addEdges(new GEdge(1f, 0, 1));
+        g.addEdges(new GEdge(1f, 0, 2));
+        g.addEdges(new GEdge(1f, 0, 3));
+
+        g.normalizeNodeEdges(a);
+
+        assertEquals(1f/3f, g.getEdges().get(0).getWeight());
+        assertEquals(1f/3f, g.getEdges().get(1).getWeight());
+        assertEquals(1f/3f, g.getEdges().get(2).getWeight());
+    }
+
 
 }

@@ -70,63 +70,43 @@ public class EdgePaneController {
 
     private void setupWeightText() {
         tfWeight.setText( df.format(edgeView.getWeight()));
-        tfWeight.textProperty().addListener((observable, oldValue, newValue) ->{
-                edgeView.setWeight(parseFloat(newValue));
-            }
+        tfWeight.textProperty().addListener((obs, ov, newValue) -> edgeView.setWeight(parseFloat(newValue))
         );
     }
 
     private void setupExtremeComboBoxes(GraphView graphView) {
-        cbDestination.valueProperty().addListener((observable, oldValue, newValue) -> {
-            onChangeDestinationComboBox(graphView, newValue);
-        });
-
-        cbOrigin.valueProperty().addListener((observable, oldValue, newValue) -> {
-            OnChangeSourceComboBox(graphView, newValue);
-        });
+        cbDestination.valueProperty().addListener((obs, ov, newValue) -> onChangeDestinationComboBox(graphView, newValue));
+        cbOrigin.valueProperty().addListener((obs, ov, newValue) -> OnChangeSourceComboBox(graphView, newValue));
     }
 
     private void OnChangeSourceComboBox(GraphView graphView, GNode newValue) {
-        if(newValue !=null){
-            int nodeId = graph.getNodeId(newValue);
-            if(!edgeExists(nodeId, edge.getDestination())){
-                this.edgeView.setOrigin(graphView.getNodeViewById(nodeId));
-                updateDestinationComboBox();
-                edgeView.refresh();
-            }else{
-                System.err.printf("Edge %d->%d already exists%n",
-                        nodeId, edgeView.getEdge().getSource());
-            }
+        if(newValue ==null) return;
+        int nodeId = graph.getNodeId(newValue);
+        if(!edgeExists(nodeId, edge.getDestination())){
+            this.edgeView.setOrigin(graphView.getNodeViewById(nodeId));
+            updateDestinationComboBox();
+            edgeView.refresh();
+        }else{
+            System.err.printf("Edge %d->%d already exists%n",nodeId, edgeView.getEdge().getSource());
         }
     }
 
     private void onChangeDestinationComboBox(GraphView graphView, GNode newValue) {
-        if(newValue !=null) {
-            int nodeId = graph.getNodeId(newValue);
-            if (!edgeExists(edge.getSource(), nodeId )) {
-                this.edgeView.setDestination(graphView.getNodeViewById(nodeId));
-                updateOriginComboBox();
-                edgeView.refresh();
-            } else {
-                System.err.printf("Edge %d->%d already exists%n",
-                        edgeView.getEdge().getSource(), nodeId);
-            }
+        if(newValue ==null) return;
+        int nodeId = graph.getNodeId(newValue);
+        if (!edgeExists(edge.getSource(), nodeId )) {
+            this.edgeView.setDestination(graphView.getNodeViewById(nodeId));
+            updateOriginComboBox();
+            edgeView.refresh();
+        } else {
+            System.err.printf("Edge %d->%d already exists%n",edgeView.getEdge().getSource(), nodeId);
         }
     }
 
     private void swapExtremes() {
-        int dstId = graph.getNodeId(edgeView.getDestination().getGNode());
-        int oriId = graph.getNodeId(edgeView.getOrigin().getGNode());
-
-        if(edgeExists(dstId,oriId)) return;
-
-        edgeView.setDestination(new NodeView("", 0, 0));
-        edgeView.setOrigin(edgeView.getDestination());
-        edgeView.setDestination(edgeView.getOrigin());
-
+        edgeView.swapExtremes();
         updateDestinationComboBox();
         updateOriginComboBox();
-        edgeView.refresh();
     }
 
     private void updateDestinationComboBox() {

@@ -131,8 +131,8 @@ public class Graph {
     }
 
     private void swapEdgesReferences(int oldID, int newID) {
-        GEdge[] compromizedEdges = getEdgesByNodeId(oldID, newID);
-        for(GEdge e : compromizedEdges){
+        GEdge[] compromisedEdges = getEdgesByNodeId(oldID, newID);
+        for(GEdge e : compromisedEdges){
             e.swapNodesIds(oldID, newID);
         }
     }

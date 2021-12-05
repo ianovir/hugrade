@@ -37,4 +37,20 @@ public class TestEdgeView {
         assertFalse(hit);
     }
 
+    @Test
+    public void testSwapExtremes() {
+        Graph g = new Graph();
+        NodeView start = new NodeView("Origin", 0,0,1);
+        NodeView end = new NodeView("Destination", 10,10,1);
+        EdgeView ev = new EdgeView(g, start, end, 1 );
+
+        assertEquals(start, ev.getOrigin());
+        assertEquals(end, ev.getDestination());
+
+        ev.swapExtremes();
+
+        assertEquals(end, ev.getOrigin());
+        assertEquals(start, ev.getDestination());
+    }
+
 }
