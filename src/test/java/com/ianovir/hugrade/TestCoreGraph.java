@@ -1,4 +1,4 @@
-package com.ianovir.hugrade.tests;
+package com.ianovir.hugrade;
 
 import com.ianovir.hugrade.core.models.GEdge;
 import com.ianovir.hugrade.core.models.GNode;

@@ -20,8 +20,8 @@ public class EdgeView extends CubicCurve {
     private static final Paint COLOR_USELESS = Color.LIGHTGREY;
 
     private static final double PI_4 = Math.PI/4;
-    private static final double STROKE_W = 2;
-    private static final double SELF_FACT = Math.PI;
+    private static final double STROKE_W = 2.5;
+    private static final double arcDistance = 4;
     private final Graph graph;
     private NodeView origin;
     private NodeView destination;
@@ -66,37 +66,6 @@ public class EdgeView extends CubicCurve {
         controlYUpdater = observable -> onExtremeChangedY();
     }
 
-    private void onExtremeChangedY() {
-        double alpha = getAngle(origin, destination);
-        double[] dirs = getControlDirByAngle(alpha);
-        double dy = dirs[1];
-        if(!origin.equals(destination)){
-            updateControlsYStraight(dy);
-        }else{
-            updateControlsYCircular();
-        }
-        updateLabelY();
-    }
-
-    private void updateControlsYStraight(double dy) {
-        double fact = Math.abs(origin.getCenterY()- destination.getCenterY())/3;
-        setControlY1(origin.getCenterY() - dy * fact);
-        setControlY2(destination.getCenterY() + dy * fact);
-        setEndY(destination.getCenterY() + dy * destination.getRadius());
-    }
-
-    private void updateControlsYCircular() {
-        setControlY1(origin.getCenterY() - SELF_FACT * origin.getRadius());
-        setControlY2(origin.getCenterY());
-        setEndY(origin.getCenterY());
-    }
-
-    private void updateLabelY() {
-        double delt = Math.signum(destination.getCenterY()-origin.getCenterY())*origin.getRadius()/2;
-        double y1 = (getEndY() + getStartY() + getControlY1() + getControlY2())/4;
-        weightLabel.setY(y1+ delt);
-    }
-
     private void onExtremeChangedX() {
         double alpha = getAngle(origin, destination);
         double[] dirs = getControlDirByAngle(alpha);
@@ -109,23 +78,66 @@ public class EdgeView extends CubicCurve {
         updateLabelX();
     }
 
+    private void onExtremeChangedY() {
+        double alpha = getAngle(origin, destination);
+        double[] dirs = getControlDirByAngle(alpha);
+        double dy = dirs[1];
+        if(!origin.equals(destination)){
+            updateControlsYStraight(dy);
+        }else{
+            updateControlsYCircular();
+        }
+        updateLabelY();
+    }
+
     private void updateControlsXStraight(double dx) {
-        double fact = Math.abs(origin.getCenterX()- destination.getCenterX())/3;
+        double fact = getBezierFactorX();
+        setStartX(origin.getCenterX());
         setControlX1(origin.getCenterX() + dx * fact);
         setControlX2(destination.getCenterX() - dx * fact);
         setEndX(destination.getCenterX() - dx * destination.getRadius());
     }
 
+    private void updateControlsYStraight(double dy) {
+        double fact = getBezierFactorY();
+        setStartY(origin.getCenterY());
+        setControlY1(origin.getCenterY() - dy * fact);
+        setControlY2(destination.getCenterY() + dy * fact);
+        setEndY(destination.getCenterY() + dy * destination.getRadius());
+    }
+
     private void updateControlsXCircular() {
-        setControlX1(origin.getCenterX());
-        setControlX2(origin.getCenterX() + SELF_FACT * origin.getRadius());
-        setEndX(origin.getCenterX() +  origin.getRadius());
+        setStartX(origin.getCenterX());
+        setControlX1(origin.getCenterX() + origin.getRadius());
+        setControlX2(origin.getCenterX() + arcDistance * origin.getRadius());
+        setEndX(origin.getCenterX() + origin.getRadius());
+    }
+
+    private void updateControlsYCircular() {
+        setStartY(origin.getCenterY() - origin.getRadius());
+        setControlY1(origin.getCenterY() - arcDistance * origin.getRadius());
+        setControlY2(origin.getCenterY());
+        setEndY(origin.getCenterY());
+    }
+
+    private double getBezierFactorX() {
+        return Math.abs(origin.getCenterX()- destination.getCenterX())/3;
+    }
+
+    private double getBezierFactorY() {
+        return Math.abs(origin.getCenterY()- destination.getCenterY())/3;
     }
 
     private void updateLabelX() {
-        double delt = Math.signum(destination.getCenterY()-origin.getCenterY())*origin.getRadius()/2;
+        double delta = Math.signum(destination.getCenterY()-origin.getCenterY())*origin.getRadius()/2;
         double x1 = (getEndX() + getStartX() + getControlX1() + getControlX2())/4;
-        weightLabel.setX(x1 +delt);
+        weightLabel.setX(x1 +delta);
+    }
+
+    private void updateLabelY() {
+        double delta = Math.signum(destination.getCenterY()-origin.getCenterY())*origin.getRadius()/2;
+        double y1 = (getEndY() + getStartY() + getControlY1() + getControlY2())/4;
+        weightLabel.setY(y1+ delta);
     }
 
     private void setupArrowEnd() {
@@ -194,10 +206,6 @@ public class EdgeView extends CubicCurve {
 
         origin.centerXProperty().addListener(controlXUpdater);
         origin.centerYProperty().addListener(controlYUpdater);
-
-        this.startXProperty().bind(origin.centerXProperty());
-        this.startYProperty().bind(origin.centerYProperty());
-
     }
 
     public void setDestination(NodeView destination) {
@@ -277,9 +285,9 @@ public class EdgeView extends CubicCurve {
     }
 
     private double getAngle(double ox , double oy, double dx, double dy) {
-        double deltax = dx - ox;
-        double deltay = oy - dy;
-        return Math.atan2(deltay, deltax);
+        double deltaX = dx - ox;
+        double deltaY = oy - dy;
+        return Math.atan2(deltaY, deltaX);
     }
 
     private double[] getControlDirByAngle(double angle){

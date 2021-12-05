@@ -1,7 +1,6 @@
-package com.ianovir.hugrade.tests.shortestPaths;
+package com.ianovir.hugrade;
 
 import com.ianovir.hugrade.core.business.solvers.GraphSolverSettings;
-import com.ianovir.hugrade.core.business.solvers.path.AStarSolver;
 import com.ianovir.hugrade.core.business.solvers.path.DijkstraSolver;
 import com.ianovir.hugrade.core.business.solvers.path.PathSolver;
 import com.ianovir.hugrade.core.models.Graph;

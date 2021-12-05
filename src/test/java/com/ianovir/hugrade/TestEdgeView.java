@@ -1,4 +1,4 @@
-package com.ianovir.hugrade.tests.ui;
+package com.ianovir.hugrade;
 
 import com.ianovir.hugrade.core.models.Graph;
 import com.ianovir.hugrade.presentation.views.EdgeView;
@@ -29,7 +29,7 @@ public class TestEdgeView {
         NodeView start = new NodeView("", 0,0,1);
         NodeView end = new NodeView("", 10,10,1);
         EdgeView ev = new EdgeView(g, start, end, 1 );
-        double poX = 1.876;
+        double poX = 2;
         double poY = 7.0;
 
         boolean hit = ev.contains(poX, poY);

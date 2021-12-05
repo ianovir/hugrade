@@ -224,16 +224,6 @@ public class GraphView {
                 .toArray(EdgeView[]::new);
     }
 
-
-    public NodeView[] getNodesByEdge(EdgeView e) {
-        Optional<NodeView> o = nodes.stream().filter(n -> e.getOrigin().equals(n)).findFirst();
-        Optional<NodeView> d = nodes.stream().filter(n -> e.getDestination().equals(n)).findFirst();
-        NodeView[] ret = new NodeView[2];
-        o.ifPresent(nodeView -> ret[0] = nodeView);
-        d.ifPresent(nodeView -> ret[1] = nodeView);
-        return ret;
-    }
-
     public Graph getGraph() {
         return mGraph;
     }

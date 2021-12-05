@@ -1,22 +1,19 @@
-package com.ianovir.hugrade.tests.shortestPaths;
+package com.ianovir.hugrade;
 
 import com.ianovir.hugrade.core.business.solvers.GraphSolverSettings;
-import com.ianovir.hugrade.core.business.solvers.path.AStarSolver;
 import com.ianovir.hugrade.core.business.solvers.path.BellmanFordSolver;
 import com.ianovir.hugrade.core.business.solvers.path.PathSolver;
-import com.ianovir.hugrade.core.models.GEdge;
-import com.ianovir.hugrade.core.models.GNode;
 import com.ianovir.hugrade.core.models.Graph;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class TestAStart {
+public class TestBellmanFord {
 
     @Test
     public void testShortestPath_CycleGraph_direct() {
         Graph g = TestGraphFactory.getGraphWithCycles();
-        PathSolver solver = new AStarSolver(g);
+        PathSolver solver = new BellmanFordSolver(g);
         GraphSolverSettings settings = new GraphSolverSettings(
                 PathSolver.BidirectionalConnectionOp.DIRECT,
                 PathSolver.NegativeEdgesOp.ZERO);
@@ -31,19 +28,6 @@ public class TestAStart {
         assertEquals(5, result[4]);//dst
     }
 
-    @Test
-    public void testShortestPath_CycleGraph_lightest() {
-        Graph g =  TestGraphFactory.getGraphWithCycles();
-        PathSolver solver = new AStarSolver(g);
-        GraphSolverSettings settings = new GraphSolverSettings(
-                PathSolver.BidirectionalConnectionOp.LIGHTEST,
-                PathSolver.NegativeEdgesOp.ZERO);
 
-        int[] result = solver.solve(0,5, settings);
-
-        assertEquals(2, result.length);
-        assertEquals(0, result[0]);//src
-        assertEquals(5, result[1]);//dst
-    }
 
 }
