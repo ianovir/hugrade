@@ -29,13 +29,8 @@ public class AStarSolver extends PathSolver{
 
         openSet.add(source);
 
-        float[] gScore = new float[graph.getNodes().size()];
-        Arrays.fill(gScore, Float.MAX_VALUE);
-        gScore[source] = 0f;
-
-        float[] fScore = new float[graph.getNodes().size()];
-        Arrays.fill(fScore, Float.MAX_VALUE);
-        fScore[source] = heuristicFunction(source);
+        float[] gScore = initGScore(source);
+        float[] fScore = initFScore(source);
 
         while(!openSet.isEmpty()){
             //the node in openSet having the lowest fScore[] value
@@ -57,17 +52,34 @@ public class AStarSolver extends PathSolver{
                 if(currentEdge==null) continue;
 
                 float tentativeGScore = gScore[current] + currentEdge.getWeight();
-                if(tentativeGScore< gScore[neighbor.getId()]){
-                    cameFrom.put(neighbor.getId(),current);
-                    gScore[neighbor.getId()] = tentativeGScore;
-                    fScore[neighbor.getId()] = gScore[neighbor.getId()] + heuristicFunction(neighbor.getId());
-                    if(openSet.size()==0 || !openSet.contains(neighbor.getId())){
-                        openSet.add(neighbor.getId());
+
+                int neighborId = graph.getNodeId(neighbor);
+
+                if(tentativeGScore< gScore[neighborId]){
+                    cameFrom.put(neighborId,current);
+                    gScore[neighborId] = tentativeGScore;
+                    fScore[neighborId] = gScore[neighborId] + heuristicFunction(neighborId);
+                    if(openSet.size()==0 || !openSet.contains(neighborId)){
+                        openSet.add(neighborId);
                     }
                 }
             }
         }
         return null;
+    }
+
+    private float[] initFScore(int source) {
+        float[] fScore = new float[graph.getNodes().size()];
+        Arrays.fill(fScore, Float.MAX_VALUE);
+        fScore[source] = heuristicFunction(source);
+        return fScore;
+    }
+
+    private float[] initGScore(int source) {
+        float[] gScore = new float[graph.getNodes().size()];
+        Arrays.fill(gScore, Float.MAX_VALUE);
+        gScore[source] = 0f;
+        return gScore;
     }
 
     public ArrayList<Integer> reconstructPath(Map<Integer, Integer> cameFrom, int current){

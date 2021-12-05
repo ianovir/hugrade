@@ -26,9 +26,10 @@ public class Graph2NodesMatrixConverter {
         String[][] ret = new String[non][3];
 
         for(int i = 0 ;i<nodes.size();i++){
-            ret[i][0]= nodes.get(i).getId()+"";
+            int nodeId = graph.getNodeId(nodes.get(i));
+            ret[i][0]= nodeId + "";
             ret[i][1]= nodes.get(i).getName();
-            ret[i][2]= String.format("%.2f",nodes.get(i).getValue()) ;
+            ret[i][2]= String.format("%.2f", nodes.get(i).getValue()) ;
         }
 
         return ret;

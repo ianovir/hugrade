@@ -5,33 +5,18 @@ package com.ianovir.hugrade.core.models;
  */
 public class GNode {
 
-    private static int ID_CNTR = 0;//id counter
-
-    private int id;
-
     private String name;
-
     private String description;
-
     private double x;
-
     private double y;
-
     double[] color;
-
     float value;
-
     public GNode(){}
 
     public GNode(String name, double posX, double posY) {
-        resetID();
         this.name = name;
         this.x = posX;
         this.y = posY;
-    }
-
-    public int getId() {
-        return id;
     }
 
     public String getName() {
@@ -66,20 +51,6 @@ public class GNode {
         this.description = description;
     }
 
-    public void setID(int id) {
-        this.id = id;
-    }
-
-    /**
-     * Re-assigns
-     */
-    public void resetID() {
-        id = ID_CNTR++;
-    }
-
-    public static void resetCounter(){
-        ID_CNTR = 0;
-    }
 
     public void setColor(double red, double green, double blue) {
         this.color = new double[]{red, green, blue};

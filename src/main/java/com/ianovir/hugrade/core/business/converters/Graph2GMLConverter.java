@@ -24,7 +24,7 @@ public class Graph2GMLConverter {
         //sb.append("nodes_mu \"").append(graph.getNodeMu()).append("\"\n");
         //sb.append("edges_mu \"").append(graph.getEdgeMu()).append("\"\n");
 
-        for(GNode node : graph.getNodes()) parseNode(node, sb);
+        for(GNode node : graph.getNodes()) parseNode(graph, node, sb);
         for(GEdge edge : graph.getEdges()) parseEdge(edge, sb);
 
         //footer
@@ -33,11 +33,11 @@ public class Graph2GMLConverter {
         return sb.toString();
     }
 
-    private static void parseNode(GNode node, StringBuilder sb){
+    private static void parseNode(Graph graph, GNode node, StringBuilder sb){
         //header
         sb.append("\tnode").append("\n").append("\t[").append("\n");
 
-        sb.append("\t\tid ").append(node.getId()).append("\n");
+        sb.append("\t\tid ").append(graph.getNodeId(node)).append("\n");
         sb.append("\t\tlabel \"").append(node.getName()).append("\"\n");
         sb.append("\t\tdescription \"").append(node.getDescription()).append("\"\n");
 

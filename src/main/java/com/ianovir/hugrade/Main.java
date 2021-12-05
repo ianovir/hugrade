@@ -1,6 +1,6 @@
 package com.ianovir.hugrade;
 
-import com.ianovir.hugrade.controllers.MainController;
+import com.ianovir.hugrade.presentation.controllers.MainController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.*;
@@ -10,7 +10,6 @@ import javafx.stage.Stage;
 public class Main extends Application {
 
     private MainController mainController;
-    public static String UGLY_VERSION = "1.0.1";
 
     @Override
     public void start(Stage primaryStage) throws Exception{
@@ -32,6 +31,10 @@ public class Main extends Application {
 
 
         mainController.init(this);
+    }
+
+    public static String getVersion() {
+        return "1.0.3";
     }
 
     public static void main(String[] args) {

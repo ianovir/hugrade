@@ -20,8 +20,6 @@ public class Graph2TransMatrixConverter {
     static public float[][] convert(Graph graph) {
         if(graph==null) return null;
 
-        graph.sortNodes();
-
         List<GEdge> edges = graph.getEdges();
         int non = graph.getNodes().size();
 

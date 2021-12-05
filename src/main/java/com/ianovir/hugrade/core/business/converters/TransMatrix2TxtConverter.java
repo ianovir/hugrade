@@ -22,7 +22,6 @@ public class TransMatrix2TxtConverter {
         StringBuilder sb = new StringBuilder();
 
         if(graph!=null){
-            graph.sortNodes();
             sb.append(graph.getNodes().size()).append("\n");
             for(GNode gn : graph.getNodes()){
                 sb.append(gn.getName()).append("\n");

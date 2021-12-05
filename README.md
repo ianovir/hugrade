@@ -13,7 +13,7 @@ Hugrade is a very simple software that allows to draw and analyze bidirected wei
 ### Features
 * User-friendly: nodes and edge creation/configuration with few clicks
   * negative edges
-  * bidirected edges
+  * bidirectional edges
 * Export formats:
   * GML (Graph Modelling Language)
   * CSV (transition matrix)

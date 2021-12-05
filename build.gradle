@@ -11,7 +11,7 @@ apply plugin: 'idea'
 
 mainClassName = 'com.ianovir.hugrade.Main'
 group = 'com.ianovir.hugrade'
-version = '1.0.2'
+project.setVersion("1.0.3")
 
 idea {
     module {
@@ -26,11 +26,19 @@ repositories {
 
 dependencies {
     implementation 'com.google.code.gson:gson:2.8.6'
+    implementation 'org.junit.jupiter:junit-jupiter:5.4.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.4.2'
+
 }
 
 java {
     modularity.inferModulePath = true
 }
+
+test {
+    useJUnitPlatform()
+}
+
 
 javafx {
     version = "15"
@@ -49,6 +57,8 @@ jlink {
 jar {
     manifest {
         attributes 'Main-Class': 'com.ianovir.hugrade.Main'
+        attributes 'Implementation-Title':   'HuGraDe'
+        attributes 'Implementation-Version': project.getVersion()
     }
     from {
         configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }

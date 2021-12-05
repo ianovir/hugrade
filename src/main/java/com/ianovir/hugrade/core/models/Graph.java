@@ -48,7 +48,7 @@ public class Graph {
     }
 
     public GNode getNodeById(int nodeId) {
-        Optional<GNode> result = nodes.stream().filter(n -> n.getId() == nodeId).findAny();
+        Optional<GNode> result = nodes.stream().filter(n -> getNodeId(n) == nodeId).findAny();
         return result.orElse(null);
     }
 
@@ -63,16 +63,17 @@ public class Graph {
     }
 
     public List<GNode> getNeighbors(GNode node) {
-        return getNeighbors(node.getId());
+        int nodeId = getNodeId(node);
+        return getNeighbors(nodeId);
     }
 
     public List<GNode> getNeighbors(int node) {
-        Stream<GNode> a = Arrays.stream(getEdgesByNode(node)).map(e -> getNodeById(e.getSource()));
-        Stream<GNode> b = Arrays.stream(getEdgesByNode(node)).map(e -> getNodeById(e.getDestination()));
+        Stream<GNode> a = Arrays.stream(getEdgesByNodeId(node)).map(e -> getNodeById(e.getSource()));
+        Stream<GNode> b = Arrays.stream(getEdgesByNodeId(node)).map(e -> getNodeById(e.getDestination()));
         Stream<GNode> stream = Stream.concat(a, b);
 
         //TODO filter
-        return stream.filter(n-> n.getId()!=node)
+        return stream.filter(n-> getNodeId(n)!=node)
                 .collect(Collectors.toList());
     }
 
@@ -82,17 +83,23 @@ public class Graph {
      * @return All edges connected to the node
      */
     public GEdge[] getEdgesByNode(GNode node) {
-        return getEdgesByNode(node.getId());
+        return getEdgesByNodeId(getNodeId(node));
     }
 
-    public GEdge[] getEdgesByNode(int id) {
-        return edges.stream().filter(e -> e.getSource()==id ||
-                e.getDestination()==id)
+    public GEdge[] getEdgesByNodeId(int ... id) {
+        return edges.stream().filter(e -> nodesContained(e, id))
                 .toArray(GEdge[]::new);
     }
 
+    private boolean nodesContained(GEdge e, int[] nodeIds) {
+        boolean srcContained = Arrays.stream(nodeIds).anyMatch(v -> v == e.getSource());
+        boolean dstContained = Arrays.stream(nodeIds).anyMatch(v -> v == e.getDestination());
+        return srcContained || dstContained;
+    }
+
     public GEdge[] getEdgesBySourceNode(GNode node) {
-        return getEdgesBySourceNode(node.getId());
+        int nodeId = getNodeId(node);
+        return getEdgesBySourceNode(nodeId);
     }
 
     public GEdge[] getEdgesBySourceNode(int id) {
@@ -101,7 +108,8 @@ public class Graph {
     }
 
     public GEdge[] getEdgesByDestinationNode(GNode node) {
-        return getEdgesByDestinationNode(node.getId());
+        int nodeId = getNodeId(node);
+        return getEdgesByDestinationNode(nodeId);
     }
 
     public GEdge[] getEdgesByDestinationNode(int node) {
@@ -117,46 +125,25 @@ public class Graph {
     }
 
 
-    /**
-     * Re-assign new ids to the nodes belonging to the graph
-     */
-    public void sortNodes(){
-        System.out.println("Sorting nodes' IDs...");
-        GNode.resetCounter();//resetting counters
-        for(GNode n : nodes){
-            int oldId = n.getId();
-            GEdge[] linkedEdges = getEdgesByNode(n);
-            n.resetID();
-            //updating linked edges
-            for(GEdge e : linkedEdges)
-                e.updateNodeId(oldId, n.getId());
-        }
-    }
-
     public void changeNodeID(int oldID, int newID){
-        GNode nodeA = getNodeById(oldID);
-        GNode nodeB = getNodeById(newID);
-        if(nodeA!=null){
-            if(nodeB!=null){
-                GEdge[] edgesB = getEdgesByNode(nodeB);
-                for(GEdge e: edgesB)e.updateNodeId(newID, oldID);
-                nodeB.setID(oldID);
-            }
-
-            GEdge[] edgesA = getEdgesBySourceNode(nodeA);
-            for(GEdge e: edgesA)e.updateNodeId(oldID, newID);
-            nodeA.setID(newID);
-        }
-        nodes.sort(Comparator.comparingInt(GNode::getId));
+        swapEdgesReferences(oldID, newID);
+        Collections.swap(nodes, oldID, newID);
     }
 
-    public void normalizeNode(GNode node) {
-            GEdge[] nEdges = getEdgesBySourceNode(node);
-            float sumW = 0;
-            for(GEdge e : nEdges) sumW+= Math.abs(e.getWeight());
-            if(sumW!=0){
-                for(GEdge e : nEdges) e.setWeight(e.getWeight()/sumW);
-            }
+    private void swapEdgesReferences(int oldID, int newID) {
+        GEdge[] compromisedEdges = getEdgesByNodeId(oldID, newID);
+        for(GEdge e : compromisedEdges){
+            e.swapNodesIds(oldID, newID);
+        }
+    }
+
+    public void normalizeNodeEdges(GNode srcNode) {
+        GEdge[] nEdges = getEdgesBySourceNode(srcNode);
+        float weightSum = 0;
+        for(GEdge e : nEdges) weightSum+= Math.abs(e.getWeight());
+        if(weightSum!=0){
+            for(GEdge e : nEdges) e.setWeight(e.getWeight()/weightSum);
+        }
     }
 
     public boolean showNodeValues() {
@@ -183,11 +170,19 @@ public class Graph {
         this.edgeMu = edgeMu;
     }
 
+    public boolean edgeExists(int source, int destination) {
+        return getEdgesByNodeIDs(source, destination)!=null;
+    }
+
+    public int getNodeId(GNode node) {
+        return nodes.indexOf(node);
+    }
+
     public boolean isNodeValuesVisible() {
         return nodeValuesVisible;
     }
 
-    public boolean edgeExists(int source, int destination) {
-        return getEdgesByNodeIDs(source, destination)!=null;
+    public boolean areNodeValuesVisible() {
+        return nodeValuesVisible;
     }
 }
