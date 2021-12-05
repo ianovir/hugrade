@@ -7,7 +7,7 @@
 <?import javafx.scene.control.Separator?>
 <AnchorPane fx:id="mainPane" minWidth="0.0" prefHeight="24.0" prefWidth="221.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ianovir.hugrade.presentation.controllers.ToolBarController">
     <FlowPane prefHeight="24.0" prefWidth="440.0">
-      <ImageView fx:id="btnTransView" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+      <ImageView fx:id="btnTransView" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true" >
          <image>
             <Image url="@icons/tx.png" />
          </image>

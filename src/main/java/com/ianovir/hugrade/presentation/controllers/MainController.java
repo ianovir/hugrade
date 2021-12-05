@@ -2,10 +2,6 @@ package com.ianovir.hugrade.presentation.controllers;
 
 import com.ianovir.hugrade.core.business.GraphChangeObserver;
 import com.ianovir.hugrade.core.business.converters.Graph2GMLConverter;
-import com.ianovir.hugrade.core.business.solvers.path.AStarSolver;
-import com.ianovir.hugrade.core.business.solvers.path.BellmanFordSolver;
-import com.ianovir.hugrade.core.business.solvers.path.DijkstraSolver;
-import com.ianovir.hugrade.core.business.solvers.path.PathSolver;
 import com.ianovir.hugrade.core.models.Graph;
 import com.ianovir.hugrade.presentation.utils.HugradeSettings;
 import com.ianovir.hugrade.presentation.utils.WindowsLauncher;
@@ -17,14 +13,12 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
-import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
@@ -32,8 +26,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 import java.io.*;
@@ -95,13 +87,13 @@ public class MainController implements GraphView.SelectionObserver, GraphChangeO
         fileChooser.getExtensionFilters().add(graphExtFilter);
 
         initSettings();
-        setupScrollPaneSizeListeners();
         initGrid();
         redirectOutput();
         setupMenuItems();
         setupMouseInteractions();
         setupKeyboardInteractions();
         initToolbar();
+        setupScrollPaneSizeListeners();
 
         updateScene();
         onGraphChanged(null);
@@ -118,12 +110,12 @@ public class MainController implements GraphView.SelectionObserver, GraphChangeO
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
     private void setupScrollPaneSizeListeners() {
-        scrollPane.widthProperty().addListener(this::onUpdateScrollPaneWidth);
-        scrollPane.heightProperty().addListener(this::onUpdateScrollPaneHeight);
+        scrollPane.widthProperty().addListener(this::updateContentToScrollPaneWidth);
+        scrollPane.heightProperty().addListener(this::updateContentToScrollPaneHeight);
+        updateContentToScrollPaneWidth(null, null , scrollPane.getWidth());
     }
 
     private void initSettings() {
@@ -526,14 +518,14 @@ public class MainController implements GraphView.SelectionObserver, GraphChangeO
     }
 
 
-    private void onUpdateScrollPaneWidth(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+    private void updateContentToScrollPaneWidth(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
         if (newValue.doubleValue() > graphContentPane.getWidth()) {
             graphContentPane.setMinWidth(newValue.doubleValue());
             gridBox.setMinWidth(newValue.doubleValue());
         }
     }
 
-    private void onUpdateScrollPaneHeight(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+    private void updateContentToScrollPaneHeight(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
         if (newValue.doubleValue() > graphContentPane.getHeight()) {
             graphContentPane.setMinHeight(newValue.doubleValue());
             gridBox.setMinHeight(newValue.doubleValue());

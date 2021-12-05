@@ -72,17 +72,7 @@ public class PathSolverController {
     }
 
     private Task<int[]> prepareExecutionTask(GraphView graphView, PathSolver solver, int src, int dst) {
-        Task<int[]> task = new Task<>() {
-            @Override
-            public int[] call() {
-                return solver.solve(src, dst,
-                        new GraphSolverSettings(
-                                cbBidConn.getSelectionModel().getSelectedItem(),
-                                cbNegEdges.getSelectionModel().getSelectedItem()
-                        )
-                );
-            }
-        };
+        Task<int[]> task = createTask(solver, src, dst);
 
         task.setOnSucceeded(e -> {
             bar.setVisible(false);
@@ -98,6 +88,23 @@ public class PathSolverController {
             }
         });
         return task;
+    }
+
+    private Task<int[]> createTask(PathSolver solver, int src, int dst) {
+        return new Task<>() {
+            @Override
+            public int[] call() {
+                GraphSolverSettings solverSettings = getGraphSolverSettings();
+                return solver.solve(src, dst, solverSettings);
+            }
+        };
+    }
+
+    private GraphSolverSettings getGraphSolverSettings() {
+        return new GraphSolverSettings(
+                cbBidConn.getSelectionModel().getSelectedItem(),
+                cbNegEdges.getSelectionModel().getSelectedItem()
+        );
     }
 
     private void updateMatrix(int[] res, float[][] costs) {

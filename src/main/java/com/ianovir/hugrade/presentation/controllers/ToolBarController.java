@@ -4,6 +4,7 @@ import com.ianovir.hugrade.core.business.GraphChangeObserver;
 import com.ianovir.hugrade.presentation.utils.HugradeSettings;
 import com.ianovir.hugrade.presentation.utils.WindowsLauncher;
 import com.ianovir.hugrade.presentation.views.GraphView;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 
@@ -20,6 +21,14 @@ public class ToolBarController {
         this.settings = settings;
         this.observer = graphChangeObserver;
         initButtonsActions();
+        createButtonsToolTips();
+    }
+
+    private void createButtonsToolTips() {
+        Tooltip.install(btnMagnetGrid, new Tooltip("Toggle magnet grid"));
+        Tooltip.install(btnTransView, new Tooltip("Open Transition matrix"));
+        Tooltip.install(btnNodeValues, new Tooltip("Show/Hide node values"));
+        Tooltip.install(btnRemoveZeroEdges, new Tooltip("Delete zero-weighted edges"));
     }
 
     private void initButtonsActions() {

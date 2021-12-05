@@ -59,33 +59,38 @@ public class TransitionMatrixView extends AnchorPane {
     }
 
     public void forceUpdate() {
+        prepareData();
+        refreshTableColumns();
+        transMatrixTable.setItems(data);
+    }
+
+    private void refreshTableColumns() {
         transMatrixTable.getColumns().clear();
-
-        refreshData();
-
-        //define columns
         for (int col = 0; col < data.size()+1; col++) {
             TableColumn<String[], String> newTableColumn = buildTableColumn(col);
-            newTableColumn.setOnEditCommit(event -> {
-                float newVal = parseEventValue(event);
-
-                int r = event.getTablePosition().getRow();
-                int c = event.getTablePosition().getColumn();
-
-                if(c>0){
-                    graphView.updateOrCreateEdge(r, c-1, newVal);
-                    updateData(r, c-1, newVal);
-                    refreshData();
-                    notifyObservers();
-                }
-                event.consume();
-            });
-
+            boolean isFirstColumn = col==0;
+            newTableColumn.setEditable(!isFirstColumn);
+            if(!isFirstColumn){
+                newTableColumn.setOnEditCommit(this::onEditValueCell);
+            }
             transMatrixTable.getColumns().add(newTableColumn);
         }
+    }
 
-        transMatrixTable.setItems(data);
+    private void onEditValueCell(TableColumn.CellEditEvent<String[], String> event) {
+        int c = event.getTablePosition().getColumn();
+        if(c==0) return;
+        int r = event.getTablePosition().getRow();
+        float newVal = parseEventValue(event);
+        updateGraphValue(c, r, newVal);
+        event.consume();
+    }
 
+    private void updateGraphValue(int c, int r, float newVal) {
+        graphView.updateOrCreateEdge(r, c -1, newVal);
+        updateData(r, c -1, newVal);
+        prepareData();
+        notifyObservers();
     }
 
     private void updateData(int src, int dst, float newVal) {
@@ -126,20 +131,23 @@ public class TransitionMatrixView extends AnchorPane {
 
     }
 
-    private void refreshData() {
+    private void prepareData() {
         data.clear();
+        float[][] matrix = Graph2TransMatrixConverter.convert(graphView.getGraph());
 
-        //prepare data with row headers
-        float[][] res = Graph2TransMatrixConverter.convert(graphView.getGraph());
-        for(int n=0; n<res.length; n++){
-            float[] nodeRow = res[n];
+        for(int n=0; n<matrix.length; n++){
+            float[] nodeRow = matrix[n];
             String[] nodesMap = new String[nodeRow.length+1];
-            nodesMap[0] = graphView.getGraph().getNodes().get(n).getName();
+            nodesMap[0] = getNodeNameByIndex(n);
             for(int i = 1; i<nodesMap.length ;i++){
-                nodesMap[i] =  nodeRow[i-1]+"";
+                nodesMap[i] = String.valueOf(nodeRow[i-1]);
             }
             data.add(nodesMap);
         }
+    }
+
+    private String getNodeNameByIndex(int n) {
+        return graphView.getGraph().getNodes().get(n).getName();
     }
 
     public void addChangeObserver(GraphChangeObserver obs){
