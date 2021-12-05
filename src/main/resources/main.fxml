@@ -7,9 +7,8 @@
 <BorderPane fx:id="mainPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="355.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ianovir.hugrade.presentation.controllers.MainController">
            <top>
                <AnchorPane prefHeight="0.0" prefWidth="600.0" BorderPane.alignment="CENTER">
-                   <FlowPane>
-                       <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
-                           <MenuBar fx:id="mainBar" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                   <VBox AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                           <MenuBar fx:id="mainBar" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                <Menu fx:id="miFile" mnemonicParsing="false" text="File">
                                    <MenuItem fx:id="miFileNew" mnemonicParsing="false" text="New" />
                                    <SeparatorMenuItem mnemonicParsing="false" />
@@ -46,12 +45,12 @@
                                    <MenuItem fx:id="miAbout" mnemonicParsing="false" text="About" />
                                </Menu>
                            </MenuBar>
-                       </AnchorPane>
                        <Pane fx:id="toolBar" disable="true">
-                       <FlowPane.margin>
-                          <Insets left="16.0" />
-                       </FlowPane.margin></Pane>
-                   </FlowPane>
+                           <VBox.margin>
+                              <Insets left="16.0" />
+                           </VBox.margin>
+                       </Pane>
+                   </VBox>
 
                </AnchorPane>
            </top>
