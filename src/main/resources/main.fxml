@@ -8,8 +8,8 @@
            <top>
                <AnchorPane prefHeight="0.0" prefWidth="600.0" BorderPane.alignment="CENTER">
                    <FlowPane>
-                       <AnchorPane prefHeight="0.0" prefWidth="600.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" BorderPane.alignment="CENTER">
-                           <MenuBar fx:id="mainBar" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                       <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
+                           <MenuBar fx:id="mainBar" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                <Menu fx:id="miFile" mnemonicParsing="false" text="File">
                                    <MenuItem fx:id="miFileNew" mnemonicParsing="false" text="New" />
                                    <SeparatorMenuItem mnemonicParsing="false" />
@@ -48,9 +48,9 @@
                            </MenuBar>
                        </AnchorPane>
                        <Pane fx:id="toolBar" disable="true">
-               <FlowPane.margin>
-                  <Insets left="16.0" />
-               </FlowPane.margin></Pane>
+                       <FlowPane.margin>
+                          <Insets left="16.0" />
+                       </FlowPane.margin></Pane>
                    </FlowPane>
 
                </AnchorPane>
@@ -73,7 +73,7 @@
        </left>
        <bottom>
            <AnchorPane>
-               <TextArea fx:id="taConsole" editable="false" focusTraversable="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+               <TextArea fx:id="taConsole" editable="false" focusTraversable="false" layoutY="97.0" prefHeight="117.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
            </AnchorPane>
        </bottom>
     </BorderPane>

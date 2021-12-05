@@ -339,10 +339,10 @@ public class EdgeView extends CubicCurve {
         return weightContains || superContains;
     }
 
-    public void swapExtremes() {
+    public boolean swapExtremes() {
         int dstId = graph.getNodeId(destination.getGNode());
         int oriId = graph.getNodeId(origin.getGNode());
-        if(graph.edgeExists(dstId,oriId)) return;
+        if(graph.edgeExists(dstId,oriId)) return false;
 
         this.mEdge.swapNodesIds(dstId, oriId);
 
@@ -351,5 +351,7 @@ public class EdgeView extends CubicCurve {
         setDestination(origin);
         setOrigin(tmpDestination);
         refresh();
+
+        return true;
     }
 }

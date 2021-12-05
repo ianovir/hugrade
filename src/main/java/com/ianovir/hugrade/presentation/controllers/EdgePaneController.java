@@ -5,7 +5,7 @@ import com.ianovir.hugrade.core.models.GNode;
 import com.ianovir.hugrade.core.models.Graph;
 import com.ianovir.hugrade.presentation.views.EdgeView;
 import com.ianovir.hugrade.presentation.views.GraphView;
-import com.ianovir.hugrade.presentation.views.NodeView;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -31,7 +31,9 @@ public class EdgePaneController {
 
     private final DecimalFormat df = new DecimalFormat("#.###");
     private GEdge edge;
-    private Graph graph;
+    private GraphView graphView;
+    private ChangeListener<? super GNode> destinationComboBoxListener;
+    private ChangeListener<? super GNode> originComboBoxListener;
 
     @FXML
     public void initialize(){
@@ -54,18 +56,32 @@ public class EdgePaneController {
     }
 
     public void setEdge(EdgeView e, GraphView graphView){
-        this.graph = graphView.getGraph();
+        this.graphView = graphView;
         this.edgeView = e;
         this.edge = e.getEdge();
 
-        muLbl.setText(graph.getEdgeMu());
+        muLbl.setText(getGraph().getEdgeMu());
+        btnSwap.setOnAction(event -> swapExtremes());
 
         setupWeightText();
+        initComboBoxes();
+
+    }
+
+    private void initComboBoxes() {
         updateOriginComboBox();
         updateDestinationComboBox();
-        setupExtremeComboBoxes(graphView);
+        initComboBoxListeners();
+        addExtremesComboBoxListeners();
+    }
 
-        btnSwap.setOnAction(event -> swapExtremes());
+    private void initComboBoxListeners() {
+        destinationComboBoxListener = (obs, ov, newValue) -> onChangeDestinationComboBox(newValue);
+        originComboBoxListener = (obs, ov, newValue) -> OnChangeSourceComboBox(newValue);
+    }
+
+    private Graph getGraph() {
+        return graphView.getGraph();
     }
 
     private void setupWeightText() {
@@ -74,14 +90,19 @@ public class EdgePaneController {
         );
     }
 
-    private void setupExtremeComboBoxes(GraphView graphView) {
-        cbDestination.valueProperty().addListener((obs, ov, newValue) -> onChangeDestinationComboBox(graphView, newValue));
-        cbOrigin.valueProperty().addListener((obs, ov, newValue) -> OnChangeSourceComboBox(graphView, newValue));
+    private void addExtremesComboBoxListeners() {
+        cbDestination.valueProperty().addListener(destinationComboBoxListener);
+        cbOrigin.valueProperty().addListener(originComboBoxListener);
     }
 
-    private void OnChangeSourceComboBox(GraphView graphView, GNode newValue) {
+    private void removeExtremesComboBoxListeners(){
+        cbOrigin.valueProperty().removeListener(originComboBoxListener);
+        cbDestination.valueProperty().removeListener(destinationComboBoxListener);
+    }
+
+    private void OnChangeSourceComboBox(GNode newValue) {
         if(newValue ==null) return;
-        int nodeId = graph.getNodeId(newValue);
+        int nodeId = getGraph().getNodeId(newValue);
         if(!edgeExists(nodeId, edge.getDestination())){
             this.edgeView.setOrigin(graphView.getNodeViewById(nodeId));
             updateDestinationComboBox();
@@ -91,9 +112,9 @@ public class EdgePaneController {
         }
     }
 
-    private void onChangeDestinationComboBox(GraphView graphView, GNode newValue) {
+    private void onChangeDestinationComboBox(GNode newValue) {
         if(newValue ==null) return;
-        int nodeId = graph.getNodeId(newValue);
+        int nodeId = getGraph().getNodeId(newValue);
         if (!edgeExists(edge.getSource(), nodeId )) {
             this.edgeView.setDestination(graphView.getNodeViewById(nodeId));
             updateOriginComboBox();
@@ -104,26 +125,29 @@ public class EdgePaneController {
     }
 
     private void swapExtremes() {
-        edgeView.swapExtremes();
-        updateDestinationComboBox();
-        updateOriginComboBox();
+        boolean swapOk = edgeView.swapExtremes();
+        if(swapOk){
+            removeExtremesComboBoxListeners();
+            updateDestinationComboBox();
+            updateOriginComboBox();
+            addExtremesComboBoxListeners();
+        }
     }
 
     private void updateDestinationComboBox() {
         cbDestination.getItems().clear();
-        cbDestination.setItems(FXCollections.observableArrayList(graph.getNodes()));
-        cbDestination.getSelectionModel().select(graph.getNodeById(edge.getDestination()));
+        cbDestination.setItems(FXCollections.observableArrayList(getGraph().getNodes()));
+        cbDestination.getSelectionModel().select(getGraph().getNodeById(edge.getDestination()));
     }
 
     private void updateOriginComboBox() {
         cbOrigin.getItems().clear();
-        cbOrigin.setItems(FXCollections.observableArrayList(graph.getNodes()));
-        cbOrigin.getSelectionModel().select(graph.getNodeById(edge.getSource()));
+        cbOrigin.setItems(FXCollections.observableArrayList(getGraph().getNodes()));
+        cbOrigin.getSelectionModel().select(getGraph().getNodeById(edge.getSource()));
     }
 
     private boolean edgeExists(int source, int destination) {
-        return graph.edgeExists(source, destination);
+        return getGraph().edgeExists(source, destination);
     }
-
 
 }

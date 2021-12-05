@@ -509,12 +509,12 @@ public class MainController implements GraphView.SelectionObserver, GraphChangeO
 
     private void printStartingHints() {
         System.out.println("Welcome to Hugrade!");
-        System.out.println("Click on File->New to create a new project");
+        System.out.println("\t-Click on File->New to create a new project");
     }
 
     private void printHints() {
-        System.out.println("Double click to createf a Node");
-        System.out.println("Right click to create an Edge between two Nodes");
+        System.out.println("\t-Double click to create a Node");
+        System.out.println("\t-Right click to create an Edge between two Nodes");
     }
 
 
