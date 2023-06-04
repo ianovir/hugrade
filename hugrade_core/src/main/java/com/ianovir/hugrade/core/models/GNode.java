@@ -1,7 +1,7 @@
 package com.ianovir.hugrade.core.models;
 
 /**
- * Graph-Node, the core type of a node belonging to a {@link Graph}.
+ * Graph-Node, the core type of node belonging to a {@link Graph}.
  */
 public class GNode {
 
@@ -12,6 +12,13 @@ public class GNode {
     double[] color;
     float value;
     public GNode(){}
+
+
+    public GNode(String name) {
+        this.name = name;
+        this.x = 0f;
+        this.y = 0f;
+    }
 
     public GNode(String name, double posX, double posY) {
         this.name = name;

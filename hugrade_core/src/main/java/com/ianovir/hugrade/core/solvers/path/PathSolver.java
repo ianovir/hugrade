@@ -72,7 +72,7 @@ public abstract class PathSolver implements GraphSolver {
      */
     public abstract int[] solve(int source, int target, GraphSolverSettings settings);
 
-    public static void handleEdges(float[][] tm, GraphSolverSettings settings) {
+    protected static void handleEdges(float[][] tm, GraphSolverSettings settings) {
         for(int r=0;r<tm.length;r++){
             //deleting diagonal edges n->n
             if(tm[r][r]!=0) tm[r][r]=0;
@@ -84,7 +84,7 @@ public abstract class PathSolver implements GraphSolver {
     }
 
     private static void handleBidirectionalEdges(float[][] tm, GraphSolverSettings settings, int r, int c) {
-        if((tm[r][c]!=0 || tm[c][r]!=0) && settings.getmEdgesOp()== BidirectionalConnectionOp.LIGHTEST){
+        if((tm[r][c]!=0 || tm[c][r]!=0) && settings.mEdgesOp()== BidirectionalConnectionOp.LIGHTEST){
             float min = Math.min(tm[r][c], tm[c][r]);
             if(min!=0){
                 tm[r][c] = tm[c][r] = min;
@@ -96,7 +96,7 @@ public abstract class PathSolver implements GraphSolver {
 
     private static void handleNegativeEdges(float[][] tm, GraphSolverSettings settings, int r, int c) {
         if(tm[r][c]<0){
-            switch (settings.getNegEdgesOp()){
+            switch (settings.negEdgesOp()){
                 case ZERO:
                     tm[r][c]= 0;
                     break;
@@ -117,7 +117,7 @@ public abstract class PathSolver implements GraphSolver {
         GEdge bidirectionalEdge  = graph.getEdgesByNodeIDs(neighId, current);
 
         if (currentEdge == null) {
-            if (settings.getmEdgesOp() == BidirectionalConnectionOp.DIRECT) {
+            if (settings.mEdgesOp() == BidirectionalConnectionOp.DIRECT) {
                 return null;//only direct edges are admitted
             } else {
                 currentEdge = bidirectionalEdge;
@@ -126,7 +126,7 @@ public abstract class PathSolver implements GraphSolver {
 
         //negative weight
         if(currentEdge.getWeight()<0){
-            switch (settings.getNegEdgesOp()){
+            switch (settings.negEdgesOp()){
                 case ABSOLUTE:
                     currentEdge.setWeight(Math.abs(currentEdge.getWeight()));
                     break;
@@ -136,7 +136,7 @@ public abstract class PathSolver implements GraphSolver {
         }
 
         //bidirectional
-        if(settings.getmEdgesOp().equals(BidirectionalConnectionOp.LIGHTEST) && bidirectionalEdge!=null){
+        if(settings.mEdgesOp().equals(BidirectionalConnectionOp.LIGHTEST) && bidirectionalEdge!=null){
             if(currentEdge.getWeight()>=bidirectionalEdge.getWeight()) currentEdge = bidirectionalEdge;
         }
 

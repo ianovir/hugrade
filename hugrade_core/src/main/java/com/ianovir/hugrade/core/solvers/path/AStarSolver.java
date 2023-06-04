@@ -82,7 +82,7 @@ public class AStarSolver extends PathSolver{
         return gScore;
     }
 
-    public ArrayList<Integer> reconstructPath(Map<Integer, Integer> cameFrom, int current){
+    private ArrayList<Integer> reconstructPath(Map<Integer, Integer> cameFrom, int current){
         if(cameFrom.get(current)!=null){
             ArrayList<Integer> p = reconstructPath(cameFrom, cameFrom.get(current));
             p.add(current);

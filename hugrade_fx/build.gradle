@@ -22,10 +22,10 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.junit.jupiter:junit-jupiter:5.4.2'
+    implementation 'org.junit.jupiter:junit-jupiter:5.9.2'
     implementation project(path: ':hugrade_core')
     implementation project(path: ':hugrade_data')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.9.2'
 }
 
 javafx {

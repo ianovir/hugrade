@@ -1,5 +1,7 @@
 package com.ianovir.hugrade.core.lalgebra;
 
+import java.security.InvalidParameterException;
+
 /**
  * Some useful linear algebra operations on matrices
  */
@@ -10,11 +12,13 @@ public class MatrixUtils {
 
         float det = determinant(m);
 
+        if(det == 0f) throw new InvalidParameterException("Input matrix has zero determinant");
+
         if(m.length==1) return m;
         if(m.length==2) {
             return new float[][]{
                     new float[] {m[1][1]/det, -1*m[0][1]/det},
-                    new float[] {-1*m[1][0], m[0][0]/det}
+                    new float[] {-1*m[1][0]/det, m[0][0]/det}
             };
         }
         for (int i = 0; i < m.length; i++)
@@ -35,7 +39,7 @@ public class MatrixUtils {
     }
 
 
-    public static float determinant(float[][] matrix) {
+    private static float determinant(float[][] matrix) {
         if (matrix.length != matrix[0].length)
             throw new IllegalStateException("invalid dimensions");
 
@@ -53,7 +57,7 @@ public class MatrixUtils {
         return det;
     }
 
-    public static float[][] getMinor(float[][] m , int r, int c){
+    private static float[][] getMinor(float[][] m , int r, int c){
         float[][] minor = new float[m.length - 1][m.length - 1];
         for (int i = 0; i < m.length; i++)
             for (int j = 0; i != r && j < m[i].length; j++)
@@ -62,26 +66,16 @@ public class MatrixUtils {
         return minor;
     }
 
-    public static float[][] transpose(float[][] m){
-        float[][] ret = new float[m[0].length][m.length];
-        for(int r=0;r<ret.length;r++){
-            for(int c=0;c<ret[r].length;c++){
-                ret[r][c] = m[c][r];
-            }
-        }
-        return ret;
-    }
-
     public static float[][] multiplyMatrices(float[][] a, float[][] b) {
         float[][] ret = new float[a.length][b[0].length];
 
-        for (int r = 0; r < ret.length; r++) {
-            for (int c = 0; c < ret[r].length; c++) {
+        for (int row = 0; row < ret.length; row++) {
+            for (int col = 0; col < ret[row].length; col++) {
                 float sum = 0;
                 for (int i = 0; i < b.length; i++) {
-                    sum += a[r][i] * b[i][c];
+                    sum += a[row][i] * b[i][col];
                 }
-                ret[r][c] = sum;
+                ret[row][col] = sum;
             }
         }
         return ret;
@@ -90,7 +84,7 @@ public class MatrixUtils {
     public static float[][] subtractMatrices(float[][] a, float[][] b) {
         if(a.length!= b.length) return null;
         float[][] ret = new float[a.length][a.length];
-        for(int r=0;r<a.length;r++){
+        for(int r = 0; r < a.length; r++){
             for(int c=0;c<a.length;c++){
                 ret[r][c] = a[r][c] - b[r][c];
             }
@@ -106,17 +100,22 @@ public class MatrixUtils {
         return ret;
     }
 
-    public static float[][] normalize(float[][] m) {
-        float[][] ret = new float[m.length][m.length];
-        for(int r=0;r<m.length;r++){
-            float[] row = m[r];
-            float sum = 0;
-            for(float f : row) sum+=f;
-            sum = sum>0? sum:1;
-            for(int c=0;c<row.length;c++){
-                ret[r][c] = m[r][c]/sum;
+    public static float[][] stochasticNormalize(float[][] input) {
+        float[][] ret = new float[input.length][input.length];
+        for(int r=0; r<input.length; r++){
+            float[] row = input[r];
+            var sum = getAbsSumRow(row);
+            sum = sum!=0 ? sum : 1;
+            for(int c=0; c<row.length; c++){
+                ret[r][c] = Math.abs(input[r][c]/sum);
             }
         }
         return ret;
+    }
+
+    private static float getAbsSumRow(float[] row) {
+        float sum = 0;
+        for(float f : row) sum += Math.abs(f);
+        return sum;
     }
 }

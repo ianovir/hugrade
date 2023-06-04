@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * The core type of a graph, made of {@link GNode}s and {@link GEdge}s.
+ * The core type of graph, made of {@link GNode}s and {@link GEdge}s.
  */
 public class Graph {
 
@@ -137,12 +137,13 @@ public class Graph {
         }
     }
 
-    public void normalizeNodeEdges(GNode srcNode) {
+    public void stochasticNormalizeNodeEdges(GNode srcNode) {
         GEdge[] nEdges = getEdgesBySourceNode(srcNode);
         float weightSum = 0;
         for(GEdge e : nEdges) weightSum+= Math.abs(e.getWeight());
         if(weightSum!=0){
-            for(GEdge e : nEdges) e.setWeight(e.getWeight()/weightSum);
+            for(GEdge e : nEdges)
+                e.setWeight(Math.abs(e.getWeight()/weightSum));
         }
     }
 

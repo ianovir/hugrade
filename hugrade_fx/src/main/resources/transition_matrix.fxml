@@ -22,7 +22,7 @@
                      <MenuItem fx:id="miTxExportTxt" mnemonicParsing="false" text=".txt" />
                      <MenuItem fx:id="miTxExportCsv" mnemonicParsing="false" text=".csv" />
                  </Menu>
-                 <Menu mnemonicParsing="false" text="Normalize">
+                 <Menu mnemonicParsing="false" text="Normalize (Stochastic)">
                      <MenuItem fx:id="miNormalizeGraph" mnemonicParsing="false" text="Whole graph"/>
                      <MenuItem fx:id="miNormalizeNode" mnemonicParsing="false" text="Current node"/>
                  </Menu>

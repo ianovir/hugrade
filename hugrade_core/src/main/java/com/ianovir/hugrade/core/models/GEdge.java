@@ -1,7 +1,7 @@
 package com.ianovir.hugrade.core.models;
 
 /**
- * Graph-Edge, the core type of an edge belonging to a {@link Graph}. A g-edge connects two {@link GNode}s (source and
+ * Graph-Edge, the core type of edge belonging to a {@link Graph}. A g-edge connects two {@link GNode}s (source and
  * destination).
  */
 public class GEdge {

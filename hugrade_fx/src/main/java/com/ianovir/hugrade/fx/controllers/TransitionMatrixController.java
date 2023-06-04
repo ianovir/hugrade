@@ -73,7 +73,7 @@ public class TransitionMatrixController {
 
         miNormalizeGraph.setOnAction(a-> {
             GraphNormalizer gn = new GraphNormalizer();
-            gn.doWork(graphView.getGraph());
+            gn.normalize(graphView.getGraph());
             refreshUI();
         });
     }
@@ -86,7 +86,7 @@ public class TransitionMatrixController {
     private void normalizeSelectedNodeEdges() {
         if(graphView.getSelectedNodes().size()<=0) return;
         for(NodeView nv : graphView.getSelectedNodes()){
-            graphView.getGraph().normalizeNodeEdges(nv.getGNode());
+            graphView.getGraph().stochasticNormalizeNodeEdges(nv.getGNode());
         }
         refreshUI();
     }

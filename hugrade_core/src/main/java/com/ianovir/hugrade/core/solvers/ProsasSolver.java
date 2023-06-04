@@ -18,45 +18,49 @@ public class ProsasSolver {
      */
     public static float[][] solve(Graph graph){
         try{
-            System.out.println("Computing transient matrix...");
-            float[][] m = Graph2TransMatrixConverter.convert(graph);
-
-            if(m.length==2 || m.length==1) {
-                return trivialResult();
-            }
-
-            System.out.println("Normalizing transient matrix...");
-            m =  MatrixUtils.normalize(m);
-
-            System.out.println("Looking for transient and absorbing states...");
-            ArrayList<Integer> transientStates = getTransientStates(m);
-            ArrayList<Integer> absorbingStates = getAbsorbingStates(m);
-
-            if(absorbingStates.size()<=0){
-                System.out.println("No absorbing states");
-                return null;
-            }
-
-            float[][] matrixQ = getQ(m, transientStates);
-            float[][] matrixR = getR(m, transientStates, absorbingStates);
-            float[][] identityMatrix = MatrixUtils.getIdentity(matrixQ.length);
-            float[][] matrixIminusQ = MatrixUtils.subtractMatrices(identityMatrix, matrixQ);
-
-            assert matrixIminusQ != null;
-            float[][] N =  MatrixUtils.inverse(matrixIminusQ);
-            float[][] F =  MatrixUtils.multiplyMatrices(N, matrixR);
-
-            float[][] ret = new float[F[0].length][2];
-            for(int i =0;i<F[0].length;i++){
-                ret[i][0] = absorbingStates.get(i);
-                ret[i][1] = F[0][i];
-            }
-
-            return ret;
+            return trySolve(graph);
         }catch(Exception ex){
             ex.printStackTrace();
         }
         return null;
+    }
+
+    private static float[][] trySolve(Graph graph) {
+        System.out.println("Computing transient matrix...");
+        float[][] m = Graph2TransMatrixConverter.convert(graph);
+
+        if(m.length==2 || m.length==1) {
+            return trivialResult();
+        }
+
+        System.out.println("Normalizing transient matrix...");
+        m =  MatrixUtils.stochasticNormalize(m);
+
+        System.out.println("Looking for transient and absorbing states...");
+        ArrayList<Integer> transientStates = getTransientStates(m);
+        ArrayList<Integer> absorbingStates = getAbsorbingStates(m);
+
+        if(absorbingStates.size()<=0){
+            System.out.println("No absorbing states");
+            return null;
+        }
+
+        float[][] matrixQ = getQ(m, transientStates);
+        float[][] matrixR = getR(m, transientStates, absorbingStates);
+        float[][] identityMatrix = MatrixUtils.getIdentity(matrixQ.length);
+        float[][] matrixIminusQ = MatrixUtils.subtractMatrices(identityMatrix, matrixQ);
+
+        assert matrixIminusQ != null;
+        float[][] N =  MatrixUtils.inverse(matrixIminusQ);
+        float[][] F =  MatrixUtils.multiplyMatrices(N, matrixR);
+
+        float[][] ret = new float[F[0].length][2];
+        for(int i =0;i<F[0].length;i++){
+            ret[i][0] = absorbingStates.get(i);
+            ret[i][1] = F[0][i];
+        }
+
+        return ret;
     }
 
     private static float[][] trivialResult() {
