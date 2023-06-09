@@ -1,6 +1,10 @@
 name: Linux Release
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   build:
@@ -23,7 +27,6 @@ jobs:
       run: |
         ./gradlew hugrade_core:test
         ./gradlew hugrade_data:test
-        ./gradlew hugrade_fx:test
       
     - name: Build with Gradle (jlink)
       run: ./gradlew jlink

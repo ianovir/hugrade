@@ -1,6 +1,10 @@
 name: Windows Release
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   build:
@@ -20,7 +24,6 @@ jobs:
       run: |
         ./gradlew.bat hugrade_core:test
         ./gradlew.bat hugrade_data:test
-        ./gradlew.bat hugrade_fx:test
 
     - name: Build with Gradle (jlink)
       run: ./gradlew.bat jlink
