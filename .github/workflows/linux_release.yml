@@ -18,6 +18,12 @@ jobs:
         
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
+
+    - name: Execute Unit Tests
+      run: |
+        ./gradlew hugrade_core:test
+        ./gradlew hugrade_data:test
+        ./gradlew hugrade_fx:test
       
     - name: Build with Gradle (jlink)
       run: ./gradlew jlink

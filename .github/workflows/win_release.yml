@@ -16,6 +16,12 @@ jobs:
         distribution: 'adopt'
         javafx: true
 
+    - name: Execute Unit Tests
+      run: |
+        ./gradlew.bat hugrade_core:test
+        ./gradlew.bat hugrade_data:test
+        ./gradlew.bat hugrade_fx:test
+
     - name: Build with Gradle (jlink)
       run: ./gradlew.bat jlink
      
