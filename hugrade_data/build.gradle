@@ -2,8 +2,8 @@ plugins {
     id 'java'
 }
 
-group = 'org.example'
-version = 'unspecified'
+group = 'com.ianovir.hugrade'
+version = '1.0.5'
 
 repositories {
     mavenCentral()
