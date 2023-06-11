@@ -11,29 +11,32 @@ jobs:
 
     runs-on: windows-latest
 
-    steps:
-    
-    - uses: actions/checkout@v2
-    
+    steps:    
+    - uses: actions/checkout@v2    
     - name: Set up JDK
       uses: actions/setup-java@v2
       with:
-        java-version: '11'
+        java-version: '19'
         distribution: 'adopt'
         javafx: true
+
+    - name: Execute Unit Tests
+      run: |
+        ./gradlew.bat hugrade_core:test
+        ./gradlew.bat hugrade_data:test
 
     - name: Build with Gradle (jlink)
       run: ./gradlew.bat jlink
      
     - name: Pack release
-      run: tar.exe -a -c -f hugrade_release_win.zip ./build/image
+      run: tar.exe -a -c -f hugrade_release_win.zip ./hugrade_fx/build/image
                 
     - name: Create Release
       uses: ncipollo/release-action@v1
       with:
         artifacts: hugrade_release_win.zip
         allowUpdates: true
-        tag: ${{ github.ref }}
+        tag: ${{ github.ref_name }}
         token: ${{ secrets.GITHUB_TOKEN }}
       
         

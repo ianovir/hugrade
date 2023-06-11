@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.scene.control.Separator?>
+<AnchorPane fx:id="mainPane" minWidth="0.0" prefHeight="24.0" prefWidth="221.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ianovir.hugrade.fx.controllers.ToolBarController">
+    <FlowPane prefHeight="24.0" prefWidth="440.0">
+      <ImageView fx:id="btnTransView" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true" >
+         <image>
+            <Image url="@icons/tx.png" />
+         </image>
+         <FlowPane.margin>
+            <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+         </FlowPane.margin>
+      </ImageView>
+        <Separator orientation="VERTICAL" />
+        <ImageView fx:id="btnNodeValues" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+            <image>
+                <Image url="@icons/n_values.png" />
+            </image>
+            <FlowPane.margin>
+                <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+            </FlowPane.margin>
+        </ImageView>
+        <ImageView fx:id="btnMagnetGrid" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+            <image>
+                <Image url="@icons/magnet_grid.png" />
+            </image>
+            <FlowPane.margin>
+                <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+            </FlowPane.margin>
+        </ImageView>
+        <Separator orientation="VERTICAL" />
+        <ImageView fx:id="btnRemoveZeroEdges" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+            <image>
+                <Image url="@icons/remove_zero_edges.png" />
+            </image>
+            <FlowPane.margin>
+                <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+            </FlowPane.margin></ImageView>
+
+    </FlowPane>
+</AnchorPane>

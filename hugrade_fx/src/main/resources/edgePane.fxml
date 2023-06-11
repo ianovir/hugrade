@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane fx:id="mainPane" prefHeight="404.0" prefWidth="222.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ianovir.hugrade.fx.controllers.EdgePaneController">
+    <FlowPane orientation="VERTICAL" prefHeight="426.0" prefWidth="222.0">
+        <Label text="Edge">
+            <FlowPane.margin>
+                <Insets left="5.0" right="5.0" top="10.0" />
+            </FlowPane.margin>
+             <font>
+                <Font name="System Bold" size="14.0" />
+             </font>
+        </Label>
+        <Separator layoutX="15.0" layoutY="148.0" prefWidth="200.0">
+            <FlowPane.margin>
+                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+            </FlowPane.margin>
+        </Separator>
+        <FlowPane prefHeight="24.0" prefWidth="210.0">
+            <FlowPane.margin>
+                <Insets left="5.0" right="5.0" top="10.0" />
+            </FlowPane.margin>
+            <Label text="Weight:">
+                <FlowPane.margin>
+                    <Insets left="5.0" />
+                </FlowPane.margin>
+            </Label>
+            <TextField fx:id="tfWeight" prefHeight="25.0" prefWidth="92.0" promptText="Weight">
+                <FlowPane.margin>
+                    <Insets left="5.0" right="5" />
+                </FlowPane.margin>
+            </TextField>
+            <Label fx:id="muLbl" text="u" />
+        </FlowPane>
+    <TextArea fx:id="taDescription" prefHeight="61.0" prefWidth="200.0" promptText="Description">
+        <FlowPane.margin>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+        </FlowPane.margin>
+    </TextArea>
+    <Label layoutX="15.0" layoutY="15.0" text="Linked nodes">
+        <FlowPane.margin>
+            <Insets left="5.0" right="5.0" top="10.0" />
+        </FlowPane.margin>
+    </Label>
+    <Separator prefWidth="200.0">
+        <FlowPane.margin>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+        </FlowPane.margin>
+    </Separator>
+      <GridPane>
+        <columnConstraints>
+          <ColumnConstraints hgrow="SOMETIMES" maxWidth="105.0" minWidth="10.0" prefWidth="69.0" />
+            <ColumnConstraints hgrow="SOMETIMES" maxWidth="100.0" minWidth="10.0" prefWidth="100.0" />
+            <ColumnConstraints hgrow="SOMETIMES" maxWidth="50.0" minWidth="10.0" prefWidth="50.0" />
+        </columnConstraints>
+        <rowConstraints>
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+         <children>
+               <ComboBox fx:id="cbOrigin" prefHeight="25.0" prefWidth="100.0" GridPane.columnIndex="1" />
+               <Label fx:id="lblSource" text="Source" />
+               <Label fx:id="lblDestination" text="Destination" GridPane.rowIndex="1" />
+               <ComboBox fx:id="cbDestination" prefHeight="25.0" prefWidth="100" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <Button fx:id="btnSwap" mnemonicParsing="false" prefHeight="11.0" prefWidth="50.0" rotate="90.0" text="swap" wrapText="true" GridPane.columnIndex="2" GridPane.rowSpan="2">
+               <GridPane.margin>
+                  <Insets />
+               </GridPane.margin></Button>
+         </children>
+          <FlowPane.margin>
+              <Insets left="5.0" right="5.0" top="10.0" />
+          </FlowPane.margin>
+      </GridPane>
+    </FlowPane>
+</AnchorPane>

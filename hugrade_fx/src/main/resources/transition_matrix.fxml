@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import com.ianovir.hugrade.fx.views.TransitionMatrixView?>
+<AnchorPane prefHeight="400.0" prefWidth="400" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.ianovir.hugrade.fx.controllers.TransitionMatrixController"
+            fx:id="mainPane">
+   <children>
+      <GridPane layoutX="109.0" layoutY="98.0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
+        <columnConstraints>
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+        </columnConstraints>
+        <rowConstraints>
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+         <children>
+             <MenuBar>
+                 <Menu mnemonicParsing="false" text="Export">
+                     <MenuItem fx:id="miTxExportTxt" mnemonicParsing="false" text=".txt" />
+                     <MenuItem fx:id="miTxExportCsv" mnemonicParsing="false" text=".csv" />
+                 </Menu>
+                 <Menu mnemonicParsing="false" text="Normalize (Stochastic)">
+                     <MenuItem fx:id="miNormalizeGraph" mnemonicParsing="false" text="Whole graph"/>
+                     <MenuItem fx:id="miNormalizeNode" mnemonicParsing="false" text="Current node"/>
+                 </Menu>
+                 <Menu mnemonicParsing="false" text="Help">
+                     <MenuItem mnemonicParsing="false" text="About" />
+                 </Menu>
+             </MenuBar>
+             <TransitionMatrixView prefWidth="400" fx:id="transMatrix" GridPane.rowIndex="1"/>
+         </children>
+      </GridPane>
+   </children>
+</AnchorPane>

@@ -1,0 +1,19 @@
+plugins {
+    id 'java'
+}
+
+group = 'com.ianovir.hugrade'
+version = '1.0.5'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.9.2')
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.9.2'
+}
+
+test {
+    useJUnitPlatform()
+}
